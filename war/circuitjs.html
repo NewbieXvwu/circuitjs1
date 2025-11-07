@@ -4,21 +4,92 @@
   
     <!-- Properties can be specified to influence deferred binding -->
     <meta name='gwt:property' content='locale=en_UK'>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
+    <!-- Material Design 3 Color Scheme -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <!-- Titles are optional, but useful -->
-    <title></title>
+    <title>CircuitJS1 - Electronic Circuit Simulator</title>
 
 <style>
+/* Material You (MD3) Design System */
+:root {
+  /* Material Design 3 Color Tokens - Light Theme */
+  --md-sys-color-primary: #6750A4;
+  --md-sys-color-on-primary: #FFFFFF;
+  --md-sys-color-primary-container: #EADDFF;
+  --md-sys-color-on-primary-container: #21005D;
+  
+  --md-sys-color-secondary: #625B71;
+  --md-sys-color-on-secondary: #FFFFFF;
+  --md-sys-color-secondary-container: #E8DEF8;
+  --md-sys-color-on-secondary-container: #1D192B;
+  
+  --md-sys-color-tertiary: #7D5260;
+  --md-sys-color-on-tertiary: #FFFFFF;
+  --md-sys-color-tertiary-container: #FFD8E4;
+  --md-sys-color-on-tertiary-container: #31111D;
+  
+  --md-sys-color-error: #B3261E;
+  --md-sys-color-on-error: #FFFFFF;
+  --md-sys-color-error-container: #F9DEDC;
+  --md-sys-color-on-error-container: #410E0B;
+  
+  --md-sys-color-background: #FEF7FF;
+  --md-sys-color-on-background: #1C1B1F;
+  
+  --md-sys-color-surface: #FEF7FF;
+  --md-sys-color-on-surface: #1C1B1F;
+  --md-sys-color-surface-variant: #E7E0EC;
+  --md-sys-color-on-surface-variant: #49454F;
+  
+  --md-sys-color-outline: #79747E;
+  --md-sys-color-outline-variant: #CAC4D0;
+  
+  --md-sys-color-shadow: #000000;
+  --md-sys-color-scrim: #000000;
+  
+  --md-sys-color-inverse-surface: #313033;
+  --md-sys-color-inverse-on-surface: #F4EFF4;
+  --md-sys-color-inverse-primary: #D0BCFF;
+  
+  /* Elevation Shadows */
+  --md-sys-elevation-1: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+  --md-sys-elevation-2: 0px 1px 2px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+  --md-sys-elevation-3: 0px 1px 3px rgba(0, 0, 0, 0.3), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
+  
+  /* Shape */
+  --md-sys-shape-corner-extra-small: 4px;
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-extra-large: 28px;
+}
+
+body {
+  font-family: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background-color: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-background);
+  margin: 0;
+  padding: 0;
+}
+
 .disabled {
-	color: lightgray
+    color: var(--md-sys-color-outline);
+    opacity: 0.38;
 }
+
 .topSpace {
-	margin-top: 12px;
+    margin-top: 16px;
 }
+
 .cursorPointer {
    cursor: default;
 }
+
 .cursorCross {
    cursor: crosshair;
 }
@@ -28,121 +99,198 @@
 }
 
 .gwt-MenuItem-disabled {
-	color: lightgray;
+    color: var(--md-sys-color-outline);
+    opacity: 0.38;
 }
+
 .offScreen {
-	position: absolute;
-	right: 101%;
-	overflow: hidden;
+    position: absolute;
+    right: 101%;
+    overflow: hidden;
 }
+
 .gwt-Frame{
-	scrolling="no";
-	border: 0px !important;
+    scrolling="no";
+    border: 0px !important;
 }
 
 .gwt-MenuItem {
-	font-size: 12px !important;
+    font-size: 14px !important;
+    padding: 12px 16px !important;
+    border-radius: var(--md-sys-shape-corner-extra-small);
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gwt-MenuItem:hover {
+    background-color: var(--md-sys-color-surface-variant);
 }
 
 .gwt-MenuBar-horizontal {
-	font-size: 12px !important;
-	}
-	
-.gwt-Label-selected {
-	font-size: 1.3em;
-	font-weight: 700;
-	border-top: 1px solid black;
-	border-bottom: 1px solid black;
+    font-size: 14px !important;
+    background-color: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-small);
+    box-shadow: var(--md-sys-elevation-1);
 }
+    
+.gwt-Label-selected {
+    font-size: 1.3em;
+    font-weight: 500;
+    border-top: 2px solid var(--md-sys-color-primary);
+    border-bottom: 2px solid var(--md-sys-color-primary);
+    color: var(--md-sys-color-primary);
+}
+
 .gwt-Label-1off {
-	color: DarkGray;
+    color: var(--md-sys-color-on-surface-variant);
 }
 
 .gwt-Label-2off {
-	font-size:0.8em;
-	color: LightGray;
+    font-size: 0.875em;
+    color: var(--md-sys-color-outline);
 }
 
 .gwt-Label-current {
 }
 
 .gwt-Button.chbut {
-	padding:3px;
-	margin: 3px;
+    padding: 8px 12px;
+    margin: 6px;
+    border-radius: var(--md-sys-shape-corner-small);
+    border: 1px solid var(--md-sys-color-outline);
+    background-color: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: var(--md-sys-elevation-1);
+}
+
+.gwt-Button.chbut:hover {
+    background-color: var(--md-sys-color-surface-variant);
+    box-shadow: var(--md-sys-elevation-2);
 }
 
 .gwt-Button.chbut.chsel {
-	font-weight: bold;
+    font-weight: 500;
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    border-color: var(--md-sys-color-primary);
 }
 
 .gwt-Button.chbut-black {
-	background: black;
-	color: white;
+    background: var(--md-sys-color-inverse-surface);
+    color: var(--md-sys-color-inverse-on-surface);
+    border: none;
 }
 
 .gwt-Button.chbut-white {
-	background: white;
-	color: black;
+    background: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    border: 1px solid var(--md-sys-color-outline);
 }
 
 .gwt-TextBox.scalebox {
-	width: 100px;
+    width: 120px;
+    padding: 12px 16px;
+    border-radius: var(--md-sys-shape-corner-extra-small);
+    border: 1px solid var(--md-sys-color-outline);
+    background-color: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gwt-TextBox.scalebox:focus {
+    outline: none;
+    border-color: var(--md-sys-color-primary);
+    border-width: 2px;
 }
 
 .gwt-Button.expand-but {
-	line-height: 0;
-	font-size: 13px;
-	margin-right: 5px;
-	border-radius:0px;
-	display: inline-block;
-	text-align: center;
-	width: 15px;
-	height: 15px;
-	padding-left: 0;
-	padding-right: 0;
-	padding-bottom:1px;
-	padding-top:0;
-	margin-bottom:1px;
-	background:gray;
-	color:white;
+    line-height: 0;
+    font-size: 14px;
+    margin-right: 6px;
+    border-radius: var(--md-sys-shape-corner-extra-small);
+    display: inline-block;
+    text-align: center;
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    margin-bottom: 2px;
+    background: var(--md-sys-color-secondary);
+    color: var(--md-sys-color-on-secondary);
+    border: none;
+    box-shadow: var(--md-sys-elevation-1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+.gwt-Button.expand-but:hover {
+    background: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+    box-shadow: var(--md-sys-elevation-2);
+}
 
 .topButton-red {
-    margin-top: 5px;
-    margin-bottom: 5px;
-    margin-left:5px;
-    padding: 5px 7px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    margin-left: 8px;
+    padding: 10px 24px;
     text-decoration: none;
-    color: #ffffff;
+    color: var(--md-sys-color-on-error);
     cursor: pointer;
-    cursor: hand;
-    font-size: small;
-    background-color: #ff0000; 
-    border: 1px solid #bbb;
-    border-bottom: 1px solid #a0a0a0;
-    border-radius: 3px;
-    -moz-border-radius: 3px;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: var(--md-sys-color-error);
+    border: none;
+    border-radius: var(--md-sys-shape-corner-large);
+    box-shadow: var(--md-sys-elevation-1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.1px;
+}
+
+.topButton-red:hover {
+    box-shadow: var(--md-sys-elevation-2);
+    transform: translateY(-1px);
+}
+
+.topButton-red:active {
+    box-shadow: var(--md-sys-elevation-1);
+    transform: translateY(0);
 }
 
 .topButton {
-    margin-top: 5px;
-    margin-bottom: 5px;
-    margin-left:5px;
-    padding: 5px 7px;
+    margin-top: 8px;
+    margin-bottom: 8px;
+    margin-left: 8px;
+    padding: 10px 24px;
     text-decoration: none;
     cursor: pointer;
-    cursor: hand;
-    font-size: small;
-    background-color: #e7e7e7; 
-    border: 1px solid #bbb;
-    border-bottom: 1px solid #a0a0a0;
-    border-radius: 3px;
-    -moz-border-radius: 3px;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    border: none;
+    border-radius: var(--md-sys-shape-corner-large);
+    box-shadow: var(--md-sys-elevation-1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    letter-spacing: 0.1px;
+}
+
+.topButton:hover {
+    box-shadow: var(--md-sys-elevation-2);
+    transform: translateY(-1px);
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.topButton:active {
+    box-shadow: var(--md-sys-elevation-1);
+    transform: translateY(0);
 }
 
 .radioPanel label {
-	margin-right: 15px;
+    margin-right: 20px;
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface);
 }
 
 @font-face {
