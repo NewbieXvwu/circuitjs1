@@ -1,0 +1,18 @@
+{
+  "name": "circuitjs1-material-you",
+  "version": "2.0.0",
+  "private": true,
+  "description": "CircuitJS1 with Material You (MD3) UI and Cloudflare Pages deployment scripts",
+  "scripts": {
+    "build": "bash build-cloudflare.sh",
+    "deploy": "wrangler pages deploy war --project-name=circuitjs1"
+  },
+  "keywords": [
+    "circuitjs1",
+    "material-you",
+    "gwt",
+    "cloudflare-pages"
+  ],
+  "author": "CircuitJS1 Contributors",
+  "license": "GPL-2.0-or-later"
+}

@@ -1,0 +1,31 @@
+# Cloudflare Pages Headers Configuration
+# This file optimizes caching and security for CircuitJS1
+
+# Cache GWT compiled JavaScript files (immutable, can cache forever)
+/circuitjs1/*
+  Cache-Control: public, max-age=31536000, immutable
+  X-Content-Type-Options: nosniff
+
+# Cache font files (immutable)
+/font/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+
+# Main HTML file (cache but revalidate frequently)
+/circuitjs.html
+  Cache-Control: public, max-age=3600, must-revalidate
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# JavaScript libraries
+/*.js
+  Cache-Control: public, max-age=86400
+  X-Content-Type-Options: nosniff
+
+# All other files - security headers
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()

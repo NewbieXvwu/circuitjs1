@@ -1,0 +1,70 @@
+# Cloudflare Pages 配置文件
+# 用于自动部署 CircuitJS1 (Material You 版本)
+
+[build]
+  # 构建命令 - 执行自动构建脚本
+  command = "chmod +x build-cloudflare.sh && ./build-cloudflare.sh"
+  
+  # 构建输出目录 - GWT 编译后的文件所在目录
+  publish = "war"
+  
+  # 忽略构建 - 当这些文件没有变化时跳过构建
+  ignore = ["node_modules", ".git", "tests"]
+
+[build.environment]
+  # 环境变量配置
+  NODE_VERSION = "18"
+  
+# 生产环境配置
+[env.production]
+  # 生产环境的环境变量可以在这里设置
+
+# 预览环境配置（Pull Request）
+[env.preview]
+  # 预览环境的环境变量
+
+# 部署配置
+[[redirects]]
+  # 根路径重定向到主页面
+  from = "/"
+  to = "/circuitjs.html"
+  status = 302
+
+[[headers]]
+  # GWT 编译输出的 JavaScript 文件 - 永久缓存
+  for = "/circuitjs1/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  # 字体文件 - 永久缓存
+  for = "/font/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+    Access-Control-Allow-Origin = "*"
+
+[[headers]]
+  # HTML 文件 - 短期缓存，需要重新验证
+  for = "/*.html"
+  [headers.values]
+    Cache-Control = "public, max-age=3600, must-revalidate"
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  # JavaScript 库文件
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=86400"
+    X-Content-Type-Options = "nosniff"
+
+[[headers]]
+  # 全局安全头
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "geolocation=(), microphone=(), camera=()"
