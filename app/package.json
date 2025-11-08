@@ -4,7 +4,8 @@
   "description": "Interactive Circuit Simulator",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build:win": "electron-builder --win --x64"
   },
   "repository": "https://github.com/sharpie7/circuitjs1",
   "keywords": [
@@ -15,6 +16,30 @@
   ],
   "author": "Iain Sharp, Paul Falstad",
   "devDependencies": {
-    "electron": ">=9.3.1"
+    "electron": ">=9.3.1",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.lushprojects.circuitjs1",
+    "productName": "CircuitJS1",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "war/icon512.png"
+    },
+    "files": [
+      "**/*",
+      "!dist/**/*",
+      "war/**/*"
+    ]
   }
 }

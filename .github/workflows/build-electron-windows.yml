@@ -1,0 +1,55 @@
+name: Build Electron Windows x64
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'corretto'
+          java-version: '11'
+      
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v3
+      
+      - name: Build GWT project
+        run: |
+          gradle compileGwt --console verbose --info
+          gradle makeSite --console verbose --info
+      
+      - name: Prepare Electron app directory
+        run: |
+          cd app
+          if (Test-Path war) { Remove-Item -Recurse -Force war }
+          Copy-Item -Path ..\site -Destination war -Recurse
+        shell: pwsh
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies and build Electron app
+        run: |
+          cd app
+          npm install
+          npm install electron-builder --save-dev
+          npm run build:win
+        shell: pwsh
+      
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: CircuitJS1-Windows-x64
+          path: |
+            app/dist/*.exe
+            app/dist/*.exe.blockmap
+          if-no-files-found: error

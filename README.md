@@ -179,6 +179,23 @@ The simulator can also interface with your javascript code.  See [war/jsinterfac
 
 The [Electron](https://electronjs.org/) project allows web applications to be distributed as local executables for a variety of platforms. This repository contains the additional files needed to build circuitJS1 as an Electron application.
 
+### Building with GitHub Actions (Automated)
+
+A GitHub Action workflow is available to automatically build the Windows x64 Electron application:
+
+1. Go to the "Actions" tab in your GitHub repository
+2. Select "Build Electron Windows x64" from the workflow list
+3. Click "Run workflow" button
+4. Wait for the build to complete (this may take several minutes)
+5. Download the compiled executable from the "Artifacts" section of the completed workflow run
+
+The workflow will:
+* Compile the CircuitJS1 GWT project
+* Package it as a Windows x64 Electron application using electron-builder
+* Upload the installer to GitHub Artifacts
+
+### Manual Building
+
 The general approach to building an Electron application for a particular platform is documented [here](https://electronjs.org/docs/tutorial/application-distribution). The following instructions apply this approach to circuit JS.
 
 To build the Electron application:
