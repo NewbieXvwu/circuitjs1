@@ -131,6 +131,19 @@ body {
     background-color: var(--md-sys-color-surface);
     border-radius: var(--md-sys-shape-corner-small);
     box-shadow: var(--md-sys-elevation-1);
+    display: inline-flex;
+    gap: 4px;
+    padding: 4px 16px;
+    align-items: center;
+    border: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.gwt-MenuBar-horizontal td {
+    border: none !important;
+}
+
+.gwt-MenuBar-horizontal table {
+    background: transparent;
 }
     
 .gwt-Label-selected {
@@ -246,6 +259,11 @@ body {
     box-shadow: var(--md-sys-elevation-1);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     letter-spacing: 0.1px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    min-width: 128px;
 }
 
 .topButton-red:hover {
@@ -274,6 +292,11 @@ body {
     box-shadow: var(--md-sys-elevation-1);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     letter-spacing: 0.1px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    min-width: 128px;
 }
 
 .topButton:hover {
@@ -292,6 +315,72 @@ body {
     margin-right: 20px;
     font-size: 14px;
     color: var(--md-sys-color-on-surface);
+}
+
+/* Menu item layout for shortcuts */
+.menu-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    width: 100%;
+    min-width: 220px;
+}
+
+.menu-item-label {
+    flex: 0 1 auto;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.menu-item-shortcut {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    opacity: 0.7;
+    margin-left: auto;
+    padding-left: 16px;
+}
+
+/* Popup menus - rounded corners */
+.gwt-MenuBarPopup {
+    border-radius: var(--md-sys-shape-corner-medium) !important;
+    box-shadow: var(--md-sys-elevation-3) !important;
+    overflow: hidden;
+}
+
+.gwt-MenuBarPopup .menuPopupMiddleCenterInner {
+    border-radius: var(--md-sys-shape-corner-medium);
+}
+
+/* MD3 dialog button styles */
+.gwt-DialogBox .dialogButton,
+.gwt-Button.md3-button {
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    border: none;
+    border-radius: var(--md-sys-shape-corner-large);
+    box-shadow: var(--md-sys-elevation-1);
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+}
+
+.gwt-DialogBox .dialogButton:hover,
+.gwt-Button.md3-button:hover {
+    box-shadow: var(--md-sys-elevation-2);
+    transform: translateY(-1px);
+}
+
+.gwt-DialogBox .dialogButton:active,
+.gwt-Button.md3-button:active {
+    box-shadow: var(--md-sys-elevation-1);
+    transform: translateY(0);
 }
 
 </style>
@@ -318,11 +407,11 @@ body {
     <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
-	navigator.serviceWorker.register('service-worker.js').then(registration => {
-	  console.log('Service Worker registered with scope:', registration.scope);
-	}).catch(error => {
-	  console.error('Service Worker registration failed:', error);
-	});
+    navigator.serviceWorker.register('service-worker.js').then(registration => {
+      console.log('Service Worker registered with scope:', registration.scope);
+    }).catch(error => {
+      console.error('Service Worker registration failed:', error);
+    });
       });
     }
     </script>
