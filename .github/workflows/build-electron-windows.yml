@@ -40,10 +40,12 @@ jobs:
       
       - name: Install dependencies and build Electron app
         run: |
+          $ErrorActionPreference = "Stop"
           cd app
-          npm install
-          npm install electron-builder --save-dev
-          npm run build:win
+          Write-Host "Installing dependencies..."
+          npm install --verbose
+          Write-Host "Building Electron app..."
+          npm run build:win -- --verbose
         shell: pwsh
       
       - name: Upload artifacts

@@ -1,4 +1,5 @@
 const electron = require('electron')
+const remoteMain = require('@electron/remote/main')
 // Module to control application life.
 const app = electron.app
 // Module to create native browser window.
@@ -8,11 +9,14 @@ const Menu = electron.Menu
 const path = require('path')
 const url = require('url')
 
+// Initialize remote module
+remoteMain.initialize()
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 var windows = [];
 
-Menu.setApplicationMenu(false);
+Menu.setApplicationMenu(null);
 
 // save arguments
 global.sharedObject = {prop1: process.argv};
@@ -21,10 +25,16 @@ function createWindow () {
   // Create the browser window.
   var mainWindow = new BrowserWindow({width: 800, 
     height: 600,
-    webPreferences: { nativeWindowOpen: true,
-                      preload: path.join(__dirname, 'preload.js')
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      preload: path.join(__dirname, 'preload.js')
     }
   })
+  
+  // Enable remote module for this window
+  remoteMain.enable(mainWindow.webContents)
+  
   windows.push(mainWindow);
 
   // and load the index.html of the app.
@@ -49,14 +59,14 @@ function createWindow () {
       windows.splice(i, 1);
   })
 
-  mainWindow.webContents.on('new-window', (evt, url, frameName, disposition, options) => {
-	if (disposition == 'save-to-disk')
-		return;
-	if (!url.endsWith("circuitjs.html"))
-		return;
-        // app is opening a new window.  override it by creating a BrowserWindow to work around an electron bug (11128)
-	evt.preventDefault();
-	createWindow();
+  mainWindow.webContents.setWindowOpenHandler(({ url, disposition }) => {
+    if (disposition == 'save-to-disk')
+      return { action: 'deny' };
+    if (!url.endsWith("circuitjs.html"))
+      return { action: 'deny' };
+    // app is opening a new window
+    createWindow();
+    return { action: 'deny' };
   });
 
 }

@@ -1,4 +1,4 @@
-const { remote, dialog } = require('electron');
+const remote = require('@electron/remote');
 const fs = require('fs');
 
 let currWindow = remote.BrowserWindow.getFocusedWindow();
