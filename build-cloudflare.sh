@@ -63,7 +63,15 @@ if [ ! -d "$HOME/gwt" ]; then
     
     GWT_VERSION="2.10.0"
     echo "下载 GWT SDK $GWT_VERSION..."
-    curl -L -o gwt.zip "https://storage.googleapis.com/gwt-releases/gwt-${GWT_VERSION}.zip"
+    curl -fL --retry 3 --retry-delay 2 -o gwt.zip "https://github.com/gwtproject/gwt/releases/download/${GWT_VERSION}/gwt-${GWT_VERSION}.zip"
+    
+    # 验证下载的文件是否为有效的 ZIP 文件
+    if ! file gwt.zip | grep -q "Zip archive"; then
+        echo "错误: 下载的 GWT SDK 文件不是有效的 ZIP 压缩包"
+        echo "文件类型: $(file gwt.zip)"
+        rm -f gwt.zip
+        exit 1
+    fi
     
     echo "解压 GWT SDK..."
     unzip -q gwt.zip
