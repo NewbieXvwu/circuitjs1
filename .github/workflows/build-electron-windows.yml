@@ -36,16 +36,93 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '24'
+          node-version: '20'
+      
+      - name: Verify war directory
+        run: |
+          Write-Host "Checking war directory..."
+          if (-Not (Test-Path "app/war")) {
+            Write-Host "ERROR: app/war directory does not exist!"
+            exit 1
+          }
+          Write-Host "war directory exists, listing contents..."
+          Get-ChildItem -Path app/war -Recurse | Select-Object -First 10
+        shell: pwsh
       
       - name: Install dependencies and build Electron app
         run: |
-          $ErrorActionPreference = "Stop"
           cd app
-          Write-Host "Installing dependencies..."
-          npm install --verbose
-          Write-Host "Building Electron app..."
-          npm run build:win -- --verbose
+          
+          Write-Host "=== Current directory ==="
+          Get-Location
+          Write-Host ""
+          
+          Write-Host "=== Installing dependencies ==="
+          Write-Host "Running: npm install"
+          Write-Host ""
+          
+          # Run npm install and capture output
+          $npmProcess = Start-Process -FilePath "npm" -ArgumentList "install" -NoNewWindow -Wait -PassThru -RedirectStandardOutput "npm-install.log" -RedirectStandardError "npm-install-error.log"
+          
+          # Display output
+          if (Test-Path "npm-install.log") {
+            Get-Content "npm-install.log" | Write-Host
+          }
+          if (Test-Path "npm-install-error.log") {
+            Get-Content "npm-install-error.log" | Write-Host
+          }
+          
+          Write-Host ""
+          Write-Host "npm install exit code: $($npmProcess.ExitCode)"
+          
+          if ($npmProcess.ExitCode -ne 0) {
+            Write-Host "ERROR: npm install failed with exit code $($npmProcess.ExitCode)"
+            exit $npmProcess.ExitCode
+          }
+          
+          Write-Host ""
+          Write-Host "=== Verifying node_modules ==="
+          if (Test-Path "node_modules") {
+            Write-Host "node_modules exists"
+            $moduleCount = (Get-ChildItem node_modules).Count
+            Write-Host "Number of modules: $moduleCount"
+            Write-Host "First 5 modules:"
+            Get-ChildItem node_modules | Select-Object -First 5 | ForEach-Object { Write-Host "  - $($_.Name)" }
+          } else {
+            Write-Host "ERROR: node_modules was not created!"
+            exit 1
+          }
+          
+          Write-Host ""
+          Write-Host "=== Building Electron app ==="
+          Write-Host "Running: npm run build:win"
+          Write-Host ""
+          
+          # Run build and capture output
+          $buildProcess = Start-Process -FilePath "npm" -ArgumentList "run", "build:win" -NoNewWindow -Wait -PassThru -RedirectStandardOutput "npm-build.log" -RedirectStandardError "npm-build-error.log"
+          
+          # Display output
+          if (Test-Path "npm-build.log") {
+            Get-Content "npm-build.log" | Write-Host
+          }
+          if (Test-Path "npm-build-error.log") {
+            Get-Content "npm-build-error.log" | Write-Host
+          }
+          
+          Write-Host ""
+          Write-Host "npm run build:win exit code: $($buildProcess.ExitCode)"
+          
+          if ($buildProcess.ExitCode -ne 0) {
+            Write-Host "ERROR: Build failed with exit code $($buildProcess.ExitCode)"
+            exit $buildProcess.ExitCode
+          }
+          
+          Write-Host ""
+          Write-Host "=== Build completed successfully ==="
+          Write-Host "Checking dist directory..."
+          if (Test-Path "dist") {
+            Get-ChildItem dist -Recurse | Select-Object -First 10 | ForEach-Object { Write-Host "  - $($_.FullName)" }
+          }
         shell: pwsh
       
       - name: Upload artifacts
