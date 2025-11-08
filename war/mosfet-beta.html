@@ -3,7 +3,36 @@
 #content > #right > .dose > .dosesingle,
 #content > #center > .dose > .dosesingle
 {display:none !important;}</style><style>img[src="http://s05.flagcounter.com/count/pTvk/bg=FFFFFF/txt=000000/border=CCCCCC/columns=6/maxflags=36/viewers=0/labels=0/"]
-{display:none !important;}</style></head><body><h1>MOSFET Beta</h1>
+{display:none !important;}
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  background-color: #FEF7FF;
+  color: #1C1B1F;
+  padding: 16px;
+}
+input {
+  padding: 8px;
+  border: 1px solid #79747E;
+  border-radius: 4px;
+  background-color: #FEF7FF;
+  color: #1C1B1F;
+  margin: 4px;
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1C1B1F;
+    color: #E6E1E5;
+  }
+  h1 {
+    color: #E6E1E5;
+  }
+  input {
+    background-color: #2B2930;
+    color: #E6E1E5;
+    border-color: #938F99;
+  }
+}
+</style></head><body><h1>MOSFET Beta</h1>
 We use a parameter called "beta" to describe the behavior of a MOSFET.  The default value is small (20m), which is appropriate for a signal MOSFET.  To simulate
 a power MOSFET, use a larger value like 80.
 <p>
@@ -16,10 +45,10 @@ This worksheet will calculate the value of beta for a particular MOSFET, given R
 
 
 function units(x) {
-	 x = x.trim();
+     x = x.trim();
    if (x.match(/m$/)) {
        x = x.replace(/m$/, "");
-  	return .001 * x;
+      return .001 * x;
    }
    // don't think we need this but you never know
    if (x.match(/u$/)) {

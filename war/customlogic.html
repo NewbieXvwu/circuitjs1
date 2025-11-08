@@ -3,7 +3,35 @@
 #content > #right > .dose > .dosesingle,
 #content > #center > .dose > .dosesingle
 {display:none !important;}</style><style>img[src="http://s05.flagcounter.com/count/pTvk/bg=FFFFFF/txt=000000/border=CCCCCC/columns=6/maxflags=36/viewers=0/labels=0/"]
-{display:none !important;}</style></head><body><h1>Custom Logic</h1>
+{display:none !important;}
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  background-color: #FEF7FF;
+  color: #1C1B1F;
+  padding: 16px;
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1C1B1F;
+    color: #E6E1E5;
+  }
+  h1, h3 {
+    color: #E6E1E5;
+  }
+  pre {
+    background-color: #2B2930;
+    color: #E6E1E5;
+    padding: 8px;
+    border-radius: 4px;
+  }
+  tt, code {
+    background-color: #2B2930;
+    color: #D0BCFF;
+    padding: 2px 4px;
+    border-radius: 2px;
+  }
+}
+</style></head><body><h1>Custom Logic</h1>
 You can implement your own simple logic devices with custom logic chips.  (located under "Digital Chips")
 <p>
 Every custom logic device has a model name, which points to a model that describes how it works.  You can have any number of

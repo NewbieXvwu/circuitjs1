@@ -1,6 +1,52 @@
 <meta name="viewport" content="width=820">
 <title>Circuit Simulator Applet</title>
 <link rel="SHORTCUT ICON" href="favicon.ico">
+<style>
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  background-color: #FEF7FF;
+  color: #1C1B1F;
+  padding: 16px;
+}
+button {
+  font-family: 'Roboto', Arial, sans-serif;
+  background-color: #6750A4;
+  color: #FFFFFF;
+  border: none;
+  padding: 8px 16px;
+  margin: 4px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+button:hover {
+  background-color: #5546A4;
+}
+input {
+  padding: 8px;
+  border: 1px solid #79747E;
+  border-radius: 4px;
+  background-color: #FEF7FF;
+  color: #1C1B1F;
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1C1B1F;
+    color: #E6E1E5;
+  }
+  button {
+    background-color: #D0BCFF;
+    color: #381E72;
+  }
+  button:hover {
+    background-color: #C0ACEF;
+  }
+  input {
+    background-color: #2B2930;
+    color: #E6E1E5;
+    border-color: #938F99;
+  }
+}
+</style>
 <body>
 <hr>
 <iframe id="circuitFrame" width=800 height=550 src="circuitjs.html?startCircuit=jsinterface.txt"></iframe>

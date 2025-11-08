@@ -8,6 +8,55 @@
     
     <!-- Titles are optional, but useful -->
     <title></title>
+    <style>
+      body {
+        font-family: 'Roboto', Arial, sans-serif;
+        background-color: #FEF7FF;
+        color: #1C1B1F;
+        padding: 16px;
+      }
+      button {
+        font-family: 'Roboto', Arial, sans-serif;
+        background-color: #6750A4;
+        color: #FFFFFF;
+        border: none;
+        padding: 8px 16px;
+        margin: 4px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      button:hover {
+        background-color: #5546A4;
+      }
+      input {
+        padding: 8px;
+        border: 1px solid #79747E;
+        border-radius: 4px;
+        background-color: #FEF7FF;
+        color: #1C1B1F;
+      }
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #1C1B1F;
+          color: #E6E1E5;
+        }
+        h1, h2 {
+          color: #E6E1E5;
+        }
+        button {
+          background-color: #D0BCFF;
+          color: #381E72;
+        }
+        button:hover {
+          background-color: #C0ACEF;
+        }
+        input {
+          background-color: #2B2930;
+          color: #E6E1E5;
+          border-color: #938F99;
+        }
+      }
+    </style>
     </head>
     <body>
 
@@ -16,11 +65,11 @@
     <iframe name="local" src="http://127.0.0.1:8888/circuitjs.html" width=49% height=700px></iframe>
     <iframe name="remote" src="https://lushprojects.com/circuitjs/circuitjs.html" width=49% height=700px></iframe>
      
-	<button onclick="next()">Next File</button>
-	<br>
-	
-	<input type="text" id="fname" value="">
-	<button onclick="load()">Load File</button>
+    <button onclick="next()">Next File</button>
+    <br>
+    
+    <input type="text" id="fname" value="">
+    <button onclick="load()">Load File</button>
      
       <script>
       
@@ -38,9 +87,9 @@
     
     function next() {
     if (ptr<files.length-1) {
-    	ptr++;
-    	}
-    	setScr(String(ptr+1)+" of "+String(files.length-1), files[ptr]);
+        ptr++;
+        }
+        setScr(String(ptr+1)+" of "+String(files.length-1), files[ptr]);
     }
     
     function load() {
@@ -50,21 +99,21 @@
     
  
 
-	request.open('GET', '/circuitjs1/setuplist.txt', false);  // `false` makes the request synchronous
-	request.send(null);
-	console.log(request.status);
+    request.open('GET', '/circuitjs1/setuplist.txt', false);  // `false` makes the request synchronous
+    request.send(null);
+    console.log(request.status);
 
-	if (request.status === 200) {
-  		console.log("processing text");
-  		lines=request.responseText.split('\n');
-  		for(var line =0; line < lines.length; line++) {
-  		  var res = lines[line].match(/^([a-zA-Z0-9\-]+\.txt)/g); // Match lines starting with filename.txt
-  		  if (res!=null) {
-  		    files.push(res[0]);
-  		 }
-  		}
-  		console.log(files);
-  		setScr("1", files[0]);
+    if (request.status === 200) {
+          console.log("processing text");
+          lines=request.responseText.split('\n');
+          for(var line =0; line < lines.length; line++) {
+            var res = lines[line].match(/^([a-zA-Z0-9\-]+\.txt)/g); // Match lines starting with filename.txt
+            if (res!=null) {
+              files.push(res[0]);
+           }
+          }
+          console.log(files);
+          setScr("1", files[0]);
 }
 
   </script>

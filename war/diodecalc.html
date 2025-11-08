@@ -1,3 +1,39 @@
+<style>
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  background-color: #FEF7FF;
+  color: #1C1B1F;
+  padding: 16px;
+}
+input {
+  padding: 8px;
+  border: 1px solid #79747E;
+  border-radius: 4px;
+  background-color: #FEF7FF;
+  color: #1C1B1F;
+  margin: 4px;
+}
+a {
+  color: #6750A4;
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1C1B1F;
+    color: #E6E1E5;
+  }
+  h1 {
+    color: #E6E1E5;
+  }
+  input {
+    background-color: #2B2930;
+    color: #E6E1E5;
+    border-color: #938F99;
+  }
+  a {
+    color: #D0BCFF;
+  }
+}
+</style>
 <h1>Diode/LED Model Calculator</h1>
 
 Forward voltage: <input type="text" id="forward" value=".6" oninput="calc()"><p>
@@ -26,7 +62,7 @@ function convertValue(s) {
                 }
                 if (mult != 1)
                         s = s.substring(0, len-1).trim();
-		return s * mult;
+        return s * mult;
 }
 
 function calc() {

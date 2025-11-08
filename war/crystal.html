@@ -1,3 +1,36 @@
+<style>
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  background-color: #FEF7FF;
+  color: #1C1B1F;
+  padding: 16px;
+}
+input {
+  padding: 8px;
+  border: 1px solid #79747E;
+  border-radius: 4px;
+  background-color: #FEF7FF;
+  color: #1C1B1F;
+  margin: 4px;
+}
+a {
+  color: #6750A4;
+}
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #1C1B1F;
+    color: #E6E1E5;
+  }
+  input {
+    background-color: #2B2930;
+    color: #E6E1E5;
+    border-color: #938F99;
+  }
+  a {
+    color: #D0BCFF;
+  }
+}
+</style>
 In this simulator, crystals are modeled using
 <a href="circuitjs.html?ctz=CQAgjCCsCmC0YTAJgHQAZJqWgzADmSQBYw8BOSKS6tAKAGMRi0nIA2JvPVjlslMgHYkcMERBp0aMLQA2nbknYgcODkt4SpSiQyZEWSYirzij4wyjxtBZO-Yd28oiJLTTaAJxVqeJs8osbChEtADu-kzG+AG84fqGxsx+dBHJ5uCC6sapkRlERIo5tEA">this equivalent circuit</a>.
 <p>
@@ -10,10 +43,10 @@ to get a crystal with a desired frequency.
 
 
 function units(x) {
-	 x = x.trim();
+     x = x.trim();
    if (x.match(/m$/)) {
        x = x.replace(/m$/, "");
-  	return .001 * x;
+      return .001 * x;
    }
    if (x.match(/u$/)) {
        x = x.replace(/u$/, "");
