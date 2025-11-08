@@ -18,16 +18,16 @@
 <style>
 /* Material You (MD3) Design System */
 :root {
-  /* Material Design 3 Color Tokens - Light Theme */
-  --md-sys-color-primary: #6750A4;
+  /* Material Design 3 Color Tokens - Light Theme - Google Blue */
+  --md-sys-color-primary: #1A73E8;
   --md-sys-color-on-primary: #FFFFFF;
-  --md-sys-color-primary-container: #EADDFF;
-  --md-sys-color-on-primary-container: #21005D;
+  --md-sys-color-primary-container: #D3E3FD;
+  --md-sys-color-on-primary-container: #001A41;
   
-  --md-sys-color-secondary: #625B71;
+  --md-sys-color-secondary: #5F6368;
   --md-sys-color-on-secondary: #FFFFFF;
-  --md-sys-color-secondary-container: #E8DEF8;
-  --md-sys-color-on-secondary-container: #1D192B;
+  --md-sys-color-secondary-container: #E8EAED;
+  --md-sys-color-on-secondary-container: #1A1C1E;
   
   --md-sys-color-tertiary: #7D5260;
   --md-sys-color-on-tertiary: #FFFFFF;
@@ -129,13 +129,26 @@ body {
 .gwt-MenuBar-horizontal {
     font-size: 14px !important;
     background-color: var(--md-sys-color-surface);
-    border-radius: var(--md-sys-shape-corner-small);
-    box-shadow: var(--md-sys-elevation-1);
+    border-radius: 0;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
     display: inline-flex;
-    gap: 4px;
-    padding: 4px 16px;
+    gap: 0;
+    padding: 0 16px;
     align-items: center;
-    border: 1px solid var(--md-sys-color-outline-variant);
+    border: none;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.gwt-MenuBar-horizontal .gwt-MenuItem {
+    padding: 8px 16px !important;
+    border-radius: 0;
+    transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gwt-MenuBar-horizontal .gwt-MenuItem:hover {
+    background-color: var(--md-sys-color-surface-variant);
 }
 
 .gwt-MenuBar-horizontal td {
@@ -247,11 +260,11 @@ body {
     margin-top: 8px;
     margin-bottom: 8px;
     margin-left: 8px;
-    padding: 10px 24px;
+    padding: 10px 20px;
     text-decoration: none;
     color: var(--md-sys-color-on-error);
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     background-color: var(--md-sys-color-error);
     border: none;
@@ -262,8 +275,10 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    white-space: nowrap;
-    min-width: 128px;
+    white-space: normal;
+    min-width: 100px;
+    max-width: 100%;
+    text-align: center;
 }
 
 .topButton-red:hover {
@@ -280,10 +295,10 @@ body {
     margin-top: 8px;
     margin-bottom: 8px;
     margin-left: 8px;
-    padding: 10px 24px;
+    padding: 10px 20px;
     text-decoration: none;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     background-color: var(--md-sys-color-primary);
     color: var(--md-sys-color-on-primary);
@@ -295,8 +310,10 @@ body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    white-space: nowrap;
-    min-width: 128px;
+    white-space: normal;
+    min-width: 100px;
+    max-width: 100%;
+    text-align: center;
 }
 
 .topButton:hover {
@@ -317,32 +334,54 @@ body {
     color: var(--md-sys-color-on-surface);
 }
 
+/* Run controls layout */
+.md3-run-controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+}
+
+.md3-run-controls .topButton,
+.md3-run-controls .topButton-red {
+    flex: 1 1 140px;
+    min-width: 0;
+    margin: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 /* Menu item layout for shortcuts */
 .menu-item-row {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: 24px;
+    gap: 32px;
     width: 100%;
-    min-width: 220px;
+    min-width: 300px;
 }
 
 .menu-item-label {
-    flex: 0 1 auto;
+    flex: 1 1 auto;
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
     gap: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .menu-item-shortcut {
     flex: 0 0 auto;
     white-space: nowrap;
-    font-size: 12px;
+    font-size: 11px;
     color: var(--md-sys-color-on-surface-variant);
     opacity: 0.7;
     margin-left: auto;
-    padding-left: 16px;
+    padding-left: 24px;
 }
 
 /* Popup menus - rounded corners */
@@ -350,15 +389,88 @@ body {
     border-radius: var(--md-sys-shape-corner-medium) !important;
     box-shadow: var(--md-sys-elevation-3) !important;
     overflow: hidden;
+    border: none !important;
+    min-width: 320px;
 }
 
 .gwt-MenuBarPopup .menuPopupMiddleCenterInner {
     border-radius: var(--md-sys-shape-corner-medium);
+    background-color: var(--md-sys-color-surface) !important;
 }
 
-/* MD3 dialog button styles */
-.gwt-DialogBox .dialogButton,
-.gwt-Button.md3-button {
+.gwt-MenuBarPopup .gwt-MenuBar-vertical {
+    background-color: var(--md-sys-color-surface) !important;
+    border: none !important;
+}
+
+/* MD3 Dialog styles */
+.gwt-DialogBox {
+    border-radius: var(--md-sys-shape-corner-extra-large) !important;
+    box-shadow: var(--md-sys-elevation-3) !important;
+    border: none !important;
+    background-color: var(--md-sys-color-surface) !important;
+}
+
+.gwt-DialogBox .Caption {
+    background-color: var(--md-sys-color-surface) !important;
+    color: var(--md-sys-color-on-surface) !important;
+    font-size: 18px !important;
+    font-weight: 500 !important;
+    padding: 20px 24px !important;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant) !important;
+    border-radius: var(--md-sys-shape-corner-extra-large) var(--md-sys-shape-corner-extra-large) 0 0 !important;
+}
+
+.gwt-DialogBox .dialogContent {
+    background-color: var(--md-sys-color-surface) !important;
+    color: var(--md-sys-color-on-surface) !important;
+    padding: 24px !important;
+}
+
+.gwt-DialogBox .gwt-Label {
+    color: var(--md-sys-color-on-surface) !important;
+    font-size: 14px !important;
+    margin-bottom: 8px !important;
+}
+
+.gwt-DialogBox .gwt-TextBox,
+.gwt-DialogBox input[type="text"] {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: var(--md-sys-shape-corner-extra-small);
+    border: 1px solid var(--md-sys-color-outline);
+    background-color: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    transition: border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    box-sizing: border-box;
+}
+
+.gwt-DialogBox .gwt-TextBox:focus,
+.gwt-DialogBox input[type="text"]:focus {
+    outline: none;
+    border-color: var(--md-sys-color-primary);
+    border-width: 2px;
+    padding: 11px 15px;
+}
+
+.gwt-DialogBox .gwt-CheckBox {
+    margin: 8px 0;
+    color: var(--md-sys-color-on-surface);
+    font-size: 14px;
+}
+
+.gwt-DialogBox .gwt-CheckBox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    cursor: pointer;
+    accent-color: var(--md-sys-color-primary);
+}
+
+.gwt-DialogBox .gwt-Button,
+.gwt-DialogBox button {
     padding: 10px 24px;
     font-size: 14px;
     font-weight: 500;
@@ -369,18 +481,32 @@ body {
     box-shadow: var(--md-sys-elevation-1);
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
+    margin: 4px;
 }
 
-.gwt-DialogBox .dialogButton:hover,
-.gwt-Button.md3-button:hover {
+.gwt-DialogBox .gwt-Button:hover,
+.gwt-DialogBox button:hover {
     box-shadow: var(--md-sys-elevation-2);
     transform: translateY(-1px);
 }
 
-.gwt-DialogBox .dialogButton:active,
-.gwt-Button.md3-button:active {
+.gwt-DialogBox .gwt-Button:active,
+.gwt-DialogBox button:active {
     box-shadow: var(--md-sys-elevation-1);
     transform: translateY(0);
+}
+
+.gwt-DialogBox .gwt-ListBox,
+.gwt-DialogBox select {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: var(--md-sys-shape-corner-extra-small);
+    border: 1px solid var(--md-sys-color-outline);
+    background-color: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    font-family: 'Roboto', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
 }
 
 </style>

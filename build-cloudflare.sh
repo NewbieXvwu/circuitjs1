@@ -119,17 +119,16 @@ echo "编译 Java 源代码..."
 find src -name "*.java" -print0 | xargs -0 javac -encoding UTF-8 -d war/WEB-INF/classes -cp "$CLASSPATH"
 
 echo ""
-echo "运行 GWT 编译器 (草稿模式，优化速度)..."
-echo "这可能需要 3-5 分钟，请耐心等待..."
+echo "运行 GWT 编译器 (生产模式，优化体积)..."
+echo "这可能需要 5-10 分钟，请耐心等待..."
 echo ""
 
-# 使用草稿编译模式以加快速度
+# 使用生产编译模式以减小体积
 java -Xmx1024M -cp "$CLASSPATH:war/WEB-INF/classes" \
     com.google.gwt.dev.Compiler \
     -war war \
-    -style PRETTY \
-    -draftCompile \
-    -optimize 0 \
+    -style OBF \
+    -optimize 9 \
     -localWorkers 2 \
     com.lushprojects.circuitjs1.circuitjs1
 

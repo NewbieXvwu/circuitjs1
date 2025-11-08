@@ -34,8 +34,8 @@ import java.lang.Math;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CellPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -271,7 +271,7 @@ MouseOutHandler, MouseWheelHandler {
     MenuBar menuBar;
     MenuBar fileMenuBar;
     VerticalPanel verticalPanel;
-    CellPanel buttonPanel;
+    FlowPanel buttonPanel;
     private boolean mouseDragging;
     double scopeHeightFraction = 0.2;
 
@@ -288,7 +288,7 @@ MouseOutHandler, MouseWheelHandler {
     int canvasWidth, canvasHeight;
 
     static final int MENUBARHEIGHT = 30;
-    static final int TOOLBARHEIGHT = 40;
+    static final int TOOLBARHEIGHT = 56;
     static int VERTICALPANELWIDTH = 166; // default
     static final int POSTGRABSQ = 25;
     static final int MINPOSTGRABSIZE = 256;
@@ -539,8 +539,8 @@ MouseOutHandler, MouseWheelHandler {
     topPanelCheckboxLabel.addClassName("toptriggerlabel");
     topPanelCheckboxLabel.setAttribute("for", "toptrigger");
 
-    // make buttons side by side if there's room
-    buttonPanel=(VERTICALPANELWIDTH == 166) ? new HorizontalPanel() : new VerticalPanel();
+    buttonPanel = new FlowPanel();
+    buttonPanel.setStyleName("md3-run-controls");
 
     m = new MenuBar(true);
     m.addItem(undoItem = menuItemWithShortcut("ccw", "Undo", Locale.LS(ctrlMetaKey + "Z"), new MyCommand("edit","undo")));

@@ -26,17 +26,20 @@ public class Toolbar extends HorizontalPanel {
 
     public Toolbar() {
         // Set the overall style of the toolbar
-    Style style = getElement().getStyle();
-        style.setPadding(6, Style.Unit.PX);
+        Style style = getElement().getStyle();
+        addStyleName("md3-toolbar");
         style.setDisplay(Style.Display.FLEX);
-        style.setProperty("gap", "8px");
+        style.setProperty("gap", "12px");
+        style.setPadding(8, Style.Unit.PX);
         style.setProperty("alignItems", "center");
         style.setProperty("backgroundColor", "var(--md-sys-color-surface)");
-        style.setProperty("border", "1px solid var(--md-sys-color-outline-variant)");
+        style.setProperty("borderBottom", "1px solid var(--md-sys-color-outline-variant)");
         style.setProperty("boxShadow", "var(--md-sys-elevation-1)");
-        style.setProperty("borderRadius", "16px");
-        style.setProperty("margin", "8px 16px");
-    setVerticalAlignment(ALIGN_MIDDLE);
+        style.setProperty("minHeight", "56px");
+        style.setWidth("100%");
+        style.setMargin(0, Style.Unit.PX);
+        style.setProperty("boxSizing", "border-box");
+        setVerticalAlignment(ALIGN_MIDDLE);
 
     add(createIconButton("ccw", "Undo", new MyCommand("edit", "undo")));
     add(createIconButton("cw",  "Redo", new MyCommand("edit", "redo")));
