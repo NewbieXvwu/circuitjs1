@@ -9,7 +9,9 @@
 //      into a Gradle build from Maven and Eclipse+GWT based builds.
 //=====================================================================
 
-// tested with gradle 8.7
+// tested with gradle 8.7 and 8.11
+// Note: gwt-gradle-plugin 1.1.19 is not compatible with Gradle 9.x
+// Use gradlew wrapper to ensure correct Gradle version
 
 // 1. Run Gradle build with verbose output:
 // gradle compileGwt --console verbose --info

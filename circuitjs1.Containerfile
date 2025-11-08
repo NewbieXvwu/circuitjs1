@@ -7,8 +7,8 @@ COPY . /src
 WORKDIR /src
 
 RUN cd /src &&\
-    gradle compileGwt --console verbose --info &&\
-    gradle makeSite --console verbose --info
+    ./gradlew compileGwt --console verbose --info &&\
+    ./gradlew makeSite --console verbose --info
 
 
 EXPOSE 8000

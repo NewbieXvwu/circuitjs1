@@ -66,3 +66,8 @@ app/war/
 # Node.js
 node_modules/
 package-lock.json
+
+# Gradle
+.gradle/
+build/
+site/

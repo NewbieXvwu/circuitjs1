@@ -53,9 +53,9 @@ To build the application using gradle, do the following:
 
 ```bash
 # 1. Run Gradle build with verbose output:
-gradle compileGwt --console verbose --info
+./gradlew compileGwt --console verbose --info
 # 2. Create the web-site directory from the build files:
-gradle makeSite --console verbose --info
+./gradlew makeSite --console verbose --info
 ```
 
 Now, just open `site/circuitjs.html` with your browser and enjoy!
