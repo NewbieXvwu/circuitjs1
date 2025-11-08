@@ -116,7 +116,7 @@ CLASSPATH="$CLASSPATH:$GWT_SDK/validation-api-1.0.0.GA.jar"
 CLASSPATH="$CLASSPATH:$GWT_SDK/validation-api-1.0.0.GA-sources.jar"
 
 echo "编译 Java 源代码..."
-find src -name "*.java" -print0 | xargs -0 javac -d war/WEB-INF/classes -cp "$CLASSPATH"
+find src -name "*.java" -print0 | xargs -0 javac -encoding UTF-8 -d war/WEB-INF/classes -cp "$CLASSPATH"
 
 echo ""
 echo "运行 GWT 编译器 (草稿模式，优化速度)..."
