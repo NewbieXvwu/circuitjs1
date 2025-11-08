@@ -131,6 +131,73 @@ body {
     border-radius: var(--md-sys-shape-corner-small);
     box-shadow: var(--md-sys-elevation-1);
 }
+
+/* Material Design 3 Top App Bar */
+.md3-top-app-bar-wrapper {
+    background-color: var(--md-sys-color-surface);
+    box-shadow: var(--md-sys-elevation-2);
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    position: relative;
+    z-index: 5;
+}
+
+.md3-top-app-bar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: 64px;
+    padding: 0 24px;
+    box-sizing: border-box;
+    background-color: var(--md-sys-color-surface);
+}
+
+.md3-top-app-bar__title {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    letter-spacing: 0.1px;
+    margin: 0;
+}
+
+.md3-top-app-bar__menu {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.md3-top-app-bar__menu .gwt-MenuBar {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.md3-top-app-bar__menu .gwt-MenuBar-horizontal {
+    background-color: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.md3-top-app-bar__menu .gwt-MenuItem {
+    padding: 8px 16px !important;
+    margin: 0 6px;
+    border-radius: var(--md-sys-shape-corner-medium);
+    color: var(--md-sys-color-on-surface);
+    font-weight: 500;
+    font-size: 14px !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+}
+
+.md3-top-app-bar__menu .gwt-MenuItem:hover,
+.md3-top-app-bar__menu .gwt-MenuItem-selected {
+    background-color: var(--md-sys-color-secondary-container);
+    color: var(--md-sys-color-on-secondary-container);
+}
     
 .gwt-Label-selected {
     font-size: 1.3em;
