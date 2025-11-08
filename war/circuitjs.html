@@ -19,10 +19,10 @@
 /* Material You (MD3) Design System */
 :root {
   /* Material Design 3 Color Tokens - Light Theme - Google Blue */
-  --md-sys-color-primary: #1A73E8;
-  --md-sys-color-on-primary: #FFFFFF;
-  --md-sys-color-primary-container: #D3E3FD;
-  --md-sys-color-on-primary-container: #001A41;
+  --md-sys-color-primary: #afc6ff;
+  --md-sys-color-on-primary: #002e6c;
+  --md-sys-color-primary-container: #d5e3ff;
+  --md-sys-color-on-primary-container: #001a41;
   
   --md-sys-color-secondary: #5F6368;
   --md-sys-color-on-secondary: #FFFFFF;
@@ -341,13 +341,14 @@ body {
     gap: 8px;
     width: 100%;
     padding: 0;
-    margin: 0;
+    margin: 0 0 12px;
+    justify-content: flex-start;
 }
 
 .md3-run-controls .topButton,
 .md3-run-controls .topButton-red {
-    flex: 1 1 140px;
-    min-width: 0;
+    flex: 0 0 auto;
+    min-width: 120px;
     margin: 0 !important;
     white-space: nowrap;
     overflow: hidden;
@@ -357,21 +358,35 @@ body {
 /* Menu item layout for shortcuts */
 .menu-item-row {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
-    gap: 32px;
+    gap: 8px;
     width: 100%;
     min-width: 300px;
+}
+
+.menu-item-icon {
+    flex: 0 0 24px;
+    width: 24px;
+    height: 24px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.menu-item-icon i {
+    display: inline-block;
+    font-size: 18px;
 }
 
 .menu-item-label {
     flex: 1 1 auto;
     white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-align: left;
 }
 
 .menu-item-shortcut {
@@ -381,7 +396,9 @@ body {
     color: var(--md-sys-color-on-surface-variant);
     opacity: 0.7;
     margin-left: auto;
-    padding-left: 24px;
+    padding-left: 16px;
+    min-width: 80px;
+    text-align: right;
 }
 
 /* Popup menus - MD3 rounded corners */
@@ -431,6 +448,26 @@ body {
     background-color: var(--md-sys-color-surface) !important;
 }
 
+/* Hide GWT DialogBox decorative borders */
+.gwt-DialogBox .dialogTopLeft,
+.gwt-DialogBox .dialogTopCenter,
+.gwt-DialogBox .dialogTopRight,
+.gwt-DialogBox .dialogMiddleLeft,
+.gwt-DialogBox .dialogMiddleRight,
+.gwt-DialogBox .dialogBottomLeft,
+.gwt-DialogBox .dialogBottomCenter,
+.gwt-DialogBox .dialogBottomRight {
+    background: transparent !important;
+    border: none !important;
+    width: 0 !important;
+    padding: 0 !important;
+}
+
+.gwt-DialogBox .dialogMiddleCenter {
+    background-color: var(--md-sys-color-surface) !important;
+    border-radius: var(--md-sys-shape-corner-extra-large) !important;
+}
+
 .gwt-DialogBox .Caption {
     background-color: var(--md-sys-color-surface) !important;
     color: var(--md-sys-color-on-surface) !important;
@@ -445,6 +482,7 @@ body {
     background-color: var(--md-sys-color-surface) !important;
     color: var(--md-sys-color-on-surface) !important;
     padding: 24px !important;
+    border-radius: 0 0 var(--md-sys-shape-corner-extra-large) var(--md-sys-shape-corner-extra-large) !important;
 }
 
 .gwt-DialogBox .gwt-Label {
@@ -494,11 +532,11 @@ body {
     padding: 10px 24px;
     font-size: 14px;
     font-weight: 500;
-    background-color: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
-    border: none;
-    border-radius: var(--md-sys-shape-corner-large);
-    box-shadow: var(--md-sys-elevation-1);
+    background-color: var(--md-sys-color-primary) !important;
+    color: var(--md-sys-color-on-primary) !important;
+    border: none !important;
+    border-radius: var(--md-sys-shape-corner-large) !important;
+    box-shadow: var(--md-sys-elevation-1) !important;
     transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     cursor: pointer;
     margin: 4px;

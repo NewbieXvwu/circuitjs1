@@ -936,18 +936,26 @@ MouseOutHandler, MouseWheelHandler {
     }
 
     MenuItem menuItemWithShortcut(String icon, String text, String shortcut, MyCommand cmd) {
-        String iconHtml = icon.isEmpty() ? "" : "<i class=\"cirjsicon-" + icon + "\"></i>&nbsp;";
-        String labelHtml = "<span class=\"menu-item-label\">" + iconHtml + Locale.LS(text) + "</span>";
+        String iconElement = icon.isEmpty() ? "" : "<i class=\"cirjsicon-" + icon + "\"></i>";
         String shortcutHtml = shortcut == null || shortcut.isEmpty()
             ? ""
             : "<span class=\"menu-item-shortcut\">" + shortcut + "</span>";
-        String content = "<div class=\"menu-item-row\">" + labelHtml + shortcutHtml + "</div>";
+        String content = "<div class=\"menu-item-row\">" +
+            "<span class=\"menu-item-icon\">" + iconElement + "</span>" +
+            "<span class=\"menu-item-label\">" + Locale.LS(text) + "</span>" +
+            shortcutHtml +
+            "</div>";
         return new MenuItem(SafeHtmlUtils.fromTrustedString(content), cmd);
     }
     
     MenuItem iconMenuItem(String icon, String text, Command cmd) {
-        String icoStr = "<i class=\"cirjsicon-" + icon + "\"></i>&nbsp;" + Locale.LS(text); //<i class=\"cirjsicon-\"></i>&nbsp;
-        return new MenuItem(SafeHtmlUtils.fromTrustedString(icoStr), cmd);
+        String iconElement = icon == null || icon.isEmpty() ? "" : "<i class=\"cirjsicon-" + icon + "\"></i>";
+        String content = "<div class=\"menu-item-row\">" +
+            "<span class=\"menu-item-icon\">" + iconElement + "</span>" +
+            "<span class=\"menu-item-label\">" + Locale.LS(text) + "</span>" +
+            "<span class=\"menu-item-shortcut\"></span>" +
+            "</div>";
+        return new MenuItem(SafeHtmlUtils.fromTrustedString(content), cmd);
     }
     
     boolean getOptionFromStorage(String key, boolean val) {
