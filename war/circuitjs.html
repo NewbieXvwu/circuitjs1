@@ -384,23 +384,43 @@ body {
     padding-left: 24px;
 }
 
-/* Popup menus - rounded corners */
+/* Popup menus - MD3 rounded corners */
 .gwt-MenuBarPopup {
-    border-radius: var(--md-sys-shape-corner-medium) !important;
-    box-shadow: var(--md-sys-elevation-3) !important;
-    overflow: hidden;
     border: none !important;
+    background: transparent !important;
     min-width: 320px;
 }
 
+/* Hide all the decorative border cells */
+.gwt-MenuBarPopup .menuPopupTopLeft,
+.gwt-MenuBarPopup .menuPopupTopCenter,
+.gwt-MenuBarPopup .menuPopupTopRight,
+.gwt-MenuBarPopup .menuPopupMiddleLeft,
+.gwt-MenuBarPopup .menuPopupMiddleRight,
+.gwt-MenuBarPopup .menuPopupBottomLeft,
+.gwt-MenuBarPopup .menuPopupBottomCenter,
+.gwt-MenuBarPopup .menuPopupBottomRight {
+    background: transparent !important;
+    border: none !important;
+}
+
+.gwt-MenuBarPopup .menuPopupMiddleCenter {
+    background: transparent !important;
+    border: none !important;
+}
+
 .gwt-MenuBarPopup .menuPopupMiddleCenterInner {
-    border-radius: var(--md-sys-shape-corner-medium);
+    border-radius: var(--md-sys-shape-corner-medium) !important;
     background-color: var(--md-sys-color-surface) !important;
+    box-shadow: var(--md-sys-elevation-3) !important;
+    overflow: hidden !important;
+    border: none !important;
 }
 
 .gwt-MenuBarPopup .gwt-MenuBar-vertical {
     background-color: var(--md-sys-color-surface) !important;
     border: none !important;
+    border-radius: var(--md-sys-shape-corner-medium) !important;
 }
 
 /* MD3 Dialog styles */
