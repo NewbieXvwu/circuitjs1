@@ -36,7 +36,7 @@ public class Toolbar extends HorizontalPanel {
         style.setProperty("borderBottom", "1px solid var(--md-sys-color-outline-variant)");
         style.setProperty("boxShadow", "var(--md-sys-elevation-1)");
         style.setProperty("minHeight", "56px");
-        style.setWidth("100%");
+        style.setProperty("width", "100%");
         style.setMargin(0, Style.Unit.PX);
         style.setProperty("boxSizing", "border-box");
         setVerticalAlignment(ALIGN_MIDDLE);
