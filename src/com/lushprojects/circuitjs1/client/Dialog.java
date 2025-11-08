@@ -21,31 +21,47 @@ package com.lushprojects.circuitjs1.client;
 
 
 import com.google.gwt.user.client.ui.DialogBox;
+import com.google.gwt.user.client.ui.Widget;
 
 class Dialog extends DialogBox  {
 
-	boolean closeOnEnter;
+    boolean closeOnEnter;
 
-	Dialog() {
-		closeOnEnter = true;
-	}
+    Dialog() {
+        closeOnEnter = true;
+        addStyleName("md3-dialog");
+        setAnimationEnabled(true);
+        setGlassEnabled(true);
+    }
 
-	public void closeDialog()
-	{
-		hide();
-		if (CirSim.dialogShowing == this)
-		    CirSim.dialogShowing = null;
-	}
-	
-	
-	public void enterPressed() {
-	    if (closeOnEnter) {
-		apply();
-		closeDialog();
-	    }
-	}
+    @Override
+    public void setWidget(Widget w) {
+        Widget current = getWidget();
+        if (current != null) {
+            current.removeStyleName("dialogContent");
+        }
+        super.setWidget(w);
+        if (w != null) {
+            w.addStyleName("dialogContent");
+        }
+    }
 
-	void apply() {
-	}
+    public void closeDialog()
+    {
+        hide();
+        if (CirSim.dialogShowing == this)
+            CirSim.dialogShowing = null;
+    }
+    
+    
+    public void enterPressed() {
+        if (closeOnEnter) {
+        apply();
+        closeDialog();
+        }
+    }
+
+    void apply() {
+    }
 }
 

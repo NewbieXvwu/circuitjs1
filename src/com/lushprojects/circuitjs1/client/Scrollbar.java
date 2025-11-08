@@ -117,9 +117,9 @@ public class Scrollbar extends  Composite implements
     }
     
     void draw() {
-        // MD3 color palette
+        // MD3 color palette - Google Blue
         String surfaceColor = "#FEF7FF";
-        String primaryColor = "#6750A4";
+        String primaryColor = "#afc6ff";
         String outlineColor = "#79747E";
         String disabledColor = "#CAC4D0";
         

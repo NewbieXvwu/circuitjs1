@@ -34,8 +34,8 @@ import java.lang.Math;
 
 import com.google.gwt.canvas.client.Canvas;
 import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.CellPanel;
 import com.google.gwt.user.client.ui.DockLayoutPanel;
+import com.google.gwt.user.client.ui.FlowPanel;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -271,7 +271,7 @@ MouseOutHandler, MouseWheelHandler {
     MenuBar menuBar;
     MenuBar fileMenuBar;
     VerticalPanel verticalPanel;
-    CellPanel buttonPanel;
+    FlowPanel buttonPanel;
     private boolean mouseDragging;
     double scopeHeightFraction = 0.2;
 
@@ -288,7 +288,7 @@ MouseOutHandler, MouseWheelHandler {
     int canvasWidth, canvasHeight;
 
     static final int MENUBARHEIGHT = 30;
-    static final int TOOLBARHEIGHT = 40;
+    static final int TOOLBARHEIGHT = 56;
     static int VERTICALPANELWIDTH = 166; // default
     static final int POSTGRABSQ = 25;
     static final int MINPOSTGRABSIZE = 256;
@@ -539,8 +539,8 @@ MouseOutHandler, MouseWheelHandler {
     topPanelCheckboxLabel.addClassName("toptriggerlabel");
     topPanelCheckboxLabel.setAttribute("for", "toptrigger");
 
-    // make buttons side by side if there's room
-    buttonPanel=(VERTICALPANELWIDTH == 166) ? new HorizontalPanel() : new VerticalPanel();
+    buttonPanel = new FlowPanel();
+    buttonPanel.setStyleName("md3-run-controls");
 
     m = new MenuBar(true);
     m.addItem(undoItem = menuItemWithShortcut("ccw", "Undo", Locale.LS(ctrlMetaKey + "Z"), new MyCommand("edit","undo")));
@@ -936,18 +936,26 @@ MouseOutHandler, MouseWheelHandler {
     }
 
     MenuItem menuItemWithShortcut(String icon, String text, String shortcut, MyCommand cmd) {
-        String iconHtml = icon.isEmpty() ? "" : "<i class=\"cirjsicon-" + icon + "\"></i>&nbsp;";
-        String labelHtml = "<span class=\"menu-item-label\">" + iconHtml + Locale.LS(text) + "</span>";
+        String iconElement = icon.isEmpty() ? "" : "<i class=\"cirjsicon-" + icon + "\"></i>";
         String shortcutHtml = shortcut == null || shortcut.isEmpty()
             ? ""
             : "<span class=\"menu-item-shortcut\">" + shortcut + "</span>";
-        String content = "<div class=\"menu-item-row\">" + labelHtml + shortcutHtml + "</div>";
+        String content = "<div class=\"menu-item-row\">" +
+            "<span class=\"menu-item-icon\">" + iconElement + "</span>" +
+            "<span class=\"menu-item-label\">" + Locale.LS(text) + "</span>" +
+            shortcutHtml +
+            "</div>";
         return new MenuItem(SafeHtmlUtils.fromTrustedString(content), cmd);
     }
     
     MenuItem iconMenuItem(String icon, String text, Command cmd) {
-        String icoStr = "<i class=\"cirjsicon-" + icon + "\"></i>&nbsp;" + Locale.LS(text); //<i class=\"cirjsicon-\"></i>&nbsp;
-        return new MenuItem(SafeHtmlUtils.fromTrustedString(icoStr), cmd);
+        String iconElement = icon == null || icon.isEmpty() ? "" : "<i class=\"cirjsicon-" + icon + "\"></i>";
+        String content = "<div class=\"menu-item-row\">" +
+            "<span class=\"menu-item-icon\">" + iconElement + "</span>" +
+            "<span class=\"menu-item-label\">" + Locale.LS(text) + "</span>" +
+            "<span class=\"menu-item-shortcut\"></span>" +
+            "</div>";
+        return new MenuItem(SafeHtmlUtils.fromTrustedString(content), cmd);
     }
     
     boolean getOptionFromStorage(String key, boolean val) {
