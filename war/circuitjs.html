@@ -78,6 +78,10 @@ body {
   padding: 0;
 }
 
+body.menu-open {
+  overflow: hidden !important;
+}
+
 .disabled {
     color: var(--md-sys-color-outline);
     opacity: 0.38;
@@ -438,6 +442,8 @@ body {
     background-color: var(--md-sys-color-surface) !important;
     border: none !important;
     border-radius: var(--md-sys-shape-corner-medium) !important;
+    max-height: calc(100vh - 100px) !important;
+    overflow-y: auto !important;
 }
 
 /* Right-click context menu (primary menu) - MD3 rounded corners */
@@ -614,6 +620,107 @@ body {
     });
       });
     }
+    
+    // Menu overflow prevention and repositioning
+    (function() {
+      let menuObserver = null;
+      let isMenuOpen = false;
+      
+      function adjustMenuPosition(popup) {
+        if (!popup) return;
+        
+        const rect = popup.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const viewportWidth = window.innerWidth;
+        
+        // Check if menu extends beyond viewport
+        if (rect.bottom > viewportHeight || rect.top < 0 || rect.right > viewportWidth) {
+          let newTop = parseInt(popup.style.top) || 0;
+          let newLeft = parseInt(popup.style.left) || 0;
+          
+          // Adjust vertical position
+          if (rect.bottom > viewportHeight) {
+            newTop = Math.max(10, viewportHeight - rect.height - 20);
+            popup.style.top = newTop + 'px';
+          }
+          
+          if (rect.top < 0) {
+            newTop = 10;
+            popup.style.top = newTop + 'px';
+          }
+          
+          // Adjust horizontal position
+          if (rect.right > viewportWidth) {
+            newLeft = Math.max(10, viewportWidth - rect.width - 20);
+            popup.style.left = newLeft + 'px';
+          }
+        }
+      }
+      
+      function onMenuOpened(popup) {
+        if (!isMenuOpen) {
+          isMenuOpen = true;
+          document.body.classList.add('menu-open');
+        }
+        
+        // Adjust position after a brief delay to ensure menu is rendered
+        setTimeout(() => adjustMenuPosition(popup), 10);
+      }
+      
+      function onMenuClosed() {
+        const popups = document.querySelectorAll('.gwt-MenuBarPopup, .gwt-PopupPanel');
+        let anyVisible = false;
+        
+        popups.forEach(popup => {
+          const display = window.getComputedStyle(popup).display;
+          if (display !== 'none' && popup.offsetParent !== null) {
+            anyVisible = true;
+          }
+        });
+        
+        if (!anyVisible && isMenuOpen) {
+          isMenuOpen = false;
+          document.body.classList.remove('menu-open');
+        }
+      }
+      
+      // Monitor DOM for menu popup changes
+      function initMenuMonitor() {
+        menuObserver = new MutationObserver((mutations) => {
+          mutations.forEach((mutation) => {
+            mutation.addedNodes.forEach((node) => {
+              if (node.nodeType === 1) {
+                if (node.classList && (node.classList.contains('gwt-MenuBarPopup') || 
+                    node.classList.contains('gwt-PopupPanel'))) {
+                  onMenuOpened(node);
+                }
+              }
+            });
+            
+            mutation.removedNodes.forEach((node) => {
+              if (node.nodeType === 1) {
+                if (node.classList && (node.classList.contains('gwt-MenuBarPopup') || 
+                    node.classList.contains('gwt-PopupPanel'))) {
+                  onMenuClosed();
+                }
+              }
+            });
+          });
+        });
+        
+        menuObserver.observe(document.body, {
+          childList: true,
+          subtree: true
+        });
+      }
+      
+      // Initialize when DOM is ready
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initMenuMonitor);
+      } else {
+        initMenuMonitor();
+      }
+    })();
     </script>
 
   </body>
