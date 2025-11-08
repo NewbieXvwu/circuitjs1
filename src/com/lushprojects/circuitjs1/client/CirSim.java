@@ -825,7 +825,7 @@ MouseOutHandler, MouseWheelHandler {
     elmMenuBar.addItem(elmFlipXMenuItem =  new MenuItem(Locale.LS("Flip X"),new MyCommand("elm","flipx")));
     elmMenuBar.addItem(elmFlipYMenuItem =  new MenuItem(Locale.LS("Flip Y"),new MyCommand("elm","flipy")));
     elmMenuBar.addItem(elmFlipXYMenuItem =  new MenuItem(Locale.LS("Flip XY"),new MyCommand("elm","flipxy")));
-    elmMenuBar.addItem(elmSplitMenuItem = menuItemWithShortcut("", "Split Wire", Locale.LS(ctrlMetaKey + "click"), new MyCommand("elm","split")));
+    elmMenuBar.addItem(elmSplitMenuItem = new MenuItem(Locale.LS("Split Wire"), new MyCommand("elm","split")));
     elmMenuBar.addItem(elmSliderMenuItem = new MenuItem(Locale.LS("Sliders..."),new MyCommand("elm","sliders")));
 
     scopePopupMenu = new ScopePopupMenu();
@@ -1280,19 +1280,14 @@ MouseOutHandler, MouseWheelHandler {
         MenuBar otherMenuBar = new MenuBar(true);
         CheckboxMenuItem mi;
         otherMenuBar.addItem(mi=getClassCheckItem(Locale.LS("Drag All"), "DragAll"));
-        mi.setShortcut(Locale.LS("(Alt-drag)"));
         otherMenuBar.addItem(mi=getClassCheckItem(Locale.LS("Drag Row"), "DragRow"));
-        mi.setShortcut(Locale.LS("(A-S-drag)"));
         otherMenuBar.addItem(mi=getClassCheckItem(Locale.LS("Drag Column"), "DragColumn"));
-        mi.setShortcut(isMac ? Locale.LS("(A-Cmd-drag)") : Locale.LS("(A-M-drag)"));
         otherMenuBar.addItem(getClassCheckItem(Locale.LS("Drag Selected"), "DragSelected"));
         otherMenuBar.addItem(mi=getClassCheckItem(Locale.LS("Drag Post"), "DragPost"));
-        mi.setShortcut("(" + ctrlMetaKey + "drag)");
 
         mainMenuBar.addItem(SafeHtmlUtils.fromTrustedString(CheckboxMenuItem.checkBoxHtml+Locale.LS("&nbsp;</div>Drag")), otherMenuBar);
 
         mainMenuBar.addItem(mi=getClassCheckItem(Locale.LS("Select/Drag Sel"), "Select"));
-    mi.setShortcut("");
     }
     
     void composeSubcircuitMenu() {
