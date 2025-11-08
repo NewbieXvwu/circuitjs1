@@ -304,8 +304,8 @@ body.menu-open {
     cursor: pointer;
     font-size: 13px;
     font-weight: 500;
-    background-color: var(--md-sys-color-primary);
-    color: var(--md-sys-color-on-primary);
+    background-color: #0078D3;
+    color: #FFFFFF;
     border: none;
     border-radius: var(--md-sys-shape-corner-large);
     box-shadow: var(--md-sys-elevation-1);
@@ -323,8 +323,8 @@ body.menu-open {
 .topButton:hover {
     box-shadow: var(--md-sys-elevation-2);
     transform: translateY(-1px);
-    background-color: var(--md-sys-color-primary-container);
-    color: var(--md-sys-color-on-primary-container);
+    background-color: #005A9E;
+    color: #FFFFFF;
 }
 
 .topButton:active {
@@ -409,7 +409,7 @@ body.menu-open {
 .gwt-MenuBarPopup {
     border: none !important;
     background: transparent !important;
-    min-width: 320px;
+    min-width: 280px;
 }
 
 /* Hide all the decorative border cells */
@@ -444,6 +444,16 @@ body.menu-open {
     border-radius: var(--md-sys-shape-corner-medium) !important;
     max-height: calc(100vh - 100px) !important;
     overflow-y: auto !important;
+    width: auto !important;
+    white-space: nowrap !important;
+}
+
+.gwt-MenuBarPopup .gwt-MenuBar-vertical table {
+    width: 100% !important;
+}
+
+.gwt-MenuBarPopup .gwt-MenuItem {
+    white-space: nowrap !important;
 }
 
 /* Right-click context menu (primary menu) - MD3 rounded corners */
@@ -460,6 +470,16 @@ body.menu-open {
     border-radius: var(--md-sys-shape-corner-medium) !important;
     box-shadow: var(--md-sys-elevation-3) !important;
     padding: 8px 0 !important;
+    width: auto !important;
+    white-space: nowrap !important;
+}
+
+.gwt-PopupPanel .gwt-MenuBar table {
+    width: 100% !important;
+}
+
+.gwt-PopupPanel .gwt-MenuItem {
+    white-space: nowrap !important;
 }
 
 /* MD3 Dialog styles */
@@ -633,27 +653,29 @@ body.menu-open {
         const viewportHeight = window.innerHeight;
         const viewportWidth = window.innerWidth;
         
-        // Check if menu extends beyond viewport
-        if (rect.bottom > viewportHeight || rect.top < 0 || rect.right > viewportWidth) {
-          let newTop = parseInt(popup.style.top) || 0;
-          let newLeft = parseInt(popup.style.left) || 0;
-          
-          // Adjust vertical position
-          if (rect.bottom > viewportHeight) {
-            newTop = Math.max(10, viewportHeight - rect.height - 20);
-            popup.style.top = newTop + 'px';
-          }
-          
-          if (rect.top < 0) {
-            newTop = 10;
-            popup.style.top = newTop + 'px';
-          }
-          
-          // Adjust horizontal position
-          if (rect.right > viewportWidth) {
-            newLeft = Math.max(10, viewportWidth - rect.width - 20);
-            popup.style.left = newLeft + 'px';
-          }
+        let newTop = parseInt(popup.style.top) || 0;
+        let newLeft = parseInt(popup.style.left) || 0;
+        
+        // Adjust vertical position if menu extends beyond viewport
+        if (rect.bottom > viewportHeight) {
+          newTop = Math.max(10, viewportHeight - rect.height - 20);
+          popup.style.top = newTop + 'px';
+        }
+        
+        if (rect.top < 0) {
+          newTop = 10;
+          popup.style.top = newTop + 'px';
+        }
+        
+        // Adjust horizontal position if menu extends beyond viewport
+        if (rect.right > viewportWidth) {
+          newLeft = Math.max(10, viewportWidth - rect.width - 20);
+          popup.style.left = newLeft + 'px';
+        }
+        
+        if (rect.left < 0) {
+          newLeft = 10;
+          popup.style.left = newLeft + 'px';
         }
       }
       
