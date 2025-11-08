@@ -3,3 +3,5 @@ name = "circuitjs1-material-you"
 # Cloudflare Pages 专用配置
 # 注意: Pages 项目的主要配置应在 cloudflare-pages.toml 或 Dashboard 中设置
 # wrangler.toml 仅用于 wrangler CLI 工具的基本识别
+
+pages_build_output_dir = "war"
