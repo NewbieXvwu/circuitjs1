@@ -4774,15 +4774,7 @@ MouseOutHandler, MouseWheelHandler {
             doMainMenuChecks();
             contextPanel=new PopupPanel(true);
             contextPanel.add(mainMenuBar);
-            x = menuClientX;
-            y = menuClientY;
-            if (x + 400 > canvasWidth) {
-                x = Math.max(0, canvasWidth - 400);
-            }
-            if (y + 450 > canvasHeight) {
-                y = Math.max(0, canvasHeight - 450);
-            }
-            contextPanel.setPopupPosition(x,y);
+            contextPanel.setPopupPosition(menuClientX, menuClientY);
             contextPanel.show();
         }
     }
