@@ -5,11 +5,27 @@ import java.util.Vector;
 class ExprState {
     //int n;
     double values[];
+    double lastValues[];
+    double lastOutput;
     double t;
     ExprState(int xx) {
 	//n = xx;
 	values = new double[9];
+	lastValues = new double[9];
 	values[4] = Math.E;
+    }
+    
+    void updateLastValues(double lastOut) {
+	lastOutput = lastOut;
+	int i;
+	for (i = 0; i != values.length; i++)
+	    lastValues[i] = values[i];
+    }
+    
+    void reset() {
+	for (int i = 0; i != values.length; i++)
+	    lastValues[i] = 0;
+	lastOutput = 0;
     }
 }
 
@@ -41,17 +57,35 @@ class Expr {
 	case E_SUB: return left.eval(es)-right.eval(es);
 	case E_MUL: return left.eval(es)*right.eval(es);
 	case E_DIV: return left.eval(es)/right.eval(es);
-	case E_POW: return java.lang.Math.pow(left.eval(es), right.eval(es));
+	case E_POW: return Math.pow(left.eval(es), right.eval(es));
+	case E_OR:  return (left.eval(es) != 0 || right.eval(es) != 0) ? 1 : 0;
+	case E_AND: return (left.eval(es) != 0 && right.eval(es) != 0) ? 1 : 0;
+	case E_EQUALS: return (left.eval(es) == right.eval(es)) ? 1 : 0;
+	case E_NEQ: return (left.eval(es) != right.eval(es)) ? 1 : 0;
+	case E_LEQ: return (left.eval(es) <= right.eval(es)) ? 1 : 0;
+	case E_GEQ: return (left.eval(es) >= right.eval(es)) ? 1 : 0;
+	case E_LESS: return (left.eval(es) < right.eval(es)) ? 1 : 0;
+	case E_GREATER: return (left.eval(es) > right.eval(es)) ? 1 : 0;
+	case E_TERNARY: return children.get(left.eval(es) != 0 ? 1 : 2).eval(es);
 	case E_UMINUS: return -left.eval(es);
+	case E_NOT: return left.eval(es) == 0 ? 1 : 0;
 	case E_VAL: return value;
 	case E_T: return es.t;
-	case E_SIN: return java.lang.Math.sin(left.eval(es));
-	case E_COS: return java.lang.Math.cos(left.eval(es));
-	case E_ABS: return java.lang.Math.abs(left.eval(es));
-	case E_EXP: return java.lang.Math.exp(left.eval(es));
-	case E_LOG: return java.lang.Math.log(left.eval(es));
-	case E_SQRT: return java.lang.Math.sqrt(left.eval(es));
-	case E_TAN: return java.lang.Math.tan(left.eval(es));
+	case E_SIN: return Math.sin(left.eval(es));
+	case E_COS: return Math.cos(left.eval(es));
+	case E_ABS: return Math.abs(left.eval(es));
+	case E_EXP: return Math.exp(left.eval(es));
+	case E_LOG: return Math.log(left.eval(es));
+	case E_SQRT: return Math.sqrt(left.eval(es));
+	case E_TAN: return Math.tan(left.eval(es));
+	case E_ASIN: return Math.asin(left.eval(es));
+	case E_ACOS: return Math.acos(left.eval(es));
+	case E_ATAN: return Math.atan(left.eval(es));
+	case E_SINH: return Math.sinh(left.eval(es));
+	case E_COSH: return Math.cosh(left.eval(es));
+	case E_TANH: return Math.tanh(left.eval(es));
+	case E_FLOOR: return Math.floor(left.eval(es));
+	case E_CEIL: return Math.ceil(left.eval(es));
 	case E_MIN: {
 	    int i;
 	    double x = left.eval(es);
@@ -98,7 +132,15 @@ class Expr {
 		return -Math.pow(-x, right.eval(es)); 
 	    return Math.pow(x, right.eval(es)); 
 	}
+	case E_LASTOUTPUT:
+	    return es.lastOutput;
+	case E_TIMESTEP:
+	    return CirSim.theSim.timeStep;
 	default:
+	    if (type >= E_LASTA)
+		return es.lastValues[type-E_LASTA];
+	    if (type >= E_DADT)
+		return (es.values[type-E_DADT]-es.lastValues[type-E_DADT])/CirSim.theSim.timeStep;
 	    if (type >= E_A)
 		return es.values[type-E_A];
 	    CirSim.console("unknown\n");
@@ -164,7 +206,29 @@ class Expr {
     static final int E_SELECT = 27;
     static final int E_PWR = 28;
     static final int E_PWRS = 29;
-    static final int E_A = 30; // should be at end
+    static final int E_LASTOUTPUT = 30;
+    static final int E_TIMESTEP = 31;
+    static final int E_TERNARY = 32;
+    static final int E_OR = 33;
+    static final int E_AND = 34;
+    static final int E_EQUALS = 35;
+    static final int E_LEQ = 36;
+    static final int E_GEQ = 37;
+    static final int E_LESS = 38;
+    static final int E_GREATER = 39;
+    static final int E_NEQ = 40;
+    static final int E_NOT = 41;
+    static final int E_FLOOR = 42;
+    static final int E_CEIL = 43;
+    static final int E_ASIN = 44;
+    static final int E_ACOS = 45;
+    static final int E_ATAN = 46;
+    static final int E_SINH = 47;
+    static final int E_COSH = 48;
+    static final int E_TANH = 49;
+    static final int E_A = 50;
+    static final int E_DADT = E_A+10; // must be E_A+10
+    static final int E_LASTA = E_DADT+10; // should be at end and equal to E_DADT+10
 };
 
 class ExprParser {
@@ -172,7 +236,7 @@ class ExprParser {
     String token;
     int pos;
     int tlen;
-    boolean err;
+    String err;
 
     void getToken() {
 	while (pos < tlen && text.charAt(pos) == ' ')
@@ -201,6 +265,14 @@ class ExprParser {
 	    }
 	} else {
 	    i++;
+	    if (i < tlen) {
+		// ||, &&, <<, >>, ==
+		if (text.charAt(i) == c && (c == '|' || c == '&' || c == '<' || c == '>' || c == '='))
+		    i++;
+		// <=, >=
+		else if ((c == '<' || c == '>' || c == '!') && text.charAt(i) == '=')
+		    i++;
+	    }
 	}
 	token = text.substring(pos, i);
 	pos = i;
@@ -213,9 +285,15 @@ class ExprParser {
 	return true;
     }
 
+    void setError(String s) {
+	if (err == null)
+	    err = s;
+    }
+    
     void skipOrError(String s) {
-	if (!skip(s))
-	    err = true;
+	if (!skip(s)) {
+	    setError("expected " + s + ", got " + token);
+	}
     }
 
     Expr parseExpression() {
@@ -223,11 +301,63 @@ class ExprParser {
 	    return new Expr(Expr.E_VAL, 0.);
 	Expr e = parse();
 	if (token.length() > 0)
-	    err = true;
+	    setError("unexpected token: " + token);
 	return e;
     }
 
     Expr parse() {
+	Expr e = parseOr();
+	Expr e2, e3;
+	if (skip("?")) {
+	    e2 = parseOr();
+	    skipOrError(":");
+	    e3 = parse();
+	    Expr ret = new Expr(e, e2, Expr.E_TERNARY);
+	    ret.children.add(e3);
+	    return ret;
+	}
+	return e;
+    }
+    
+    Expr parseOr() {
+	Expr e = parseAnd();
+	while (skip("||")) {
+	    e = new Expr(e, parseAnd(), Expr.E_OR);
+	}
+	return e;
+    }
+    
+    Expr parseAnd() {
+	Expr e = parseEquals();
+	while (skip("&&")) {
+	    e = new Expr(e, parseEquals(), Expr.E_AND);
+	}
+	return e;
+    }
+    
+    Expr parseEquals() {
+	Expr e = parseCompare();
+	if (skip("=="))
+	    return new Expr(e, parseCompare(), Expr.E_EQUALS);
+	return e;
+    }
+    
+    Expr parseCompare() {
+	Expr e = parseAdd();
+	if (skip("<="))
+	    return new Expr(e, parseAdd(), Expr.E_LEQ);
+	if (skip(">="))
+	    return new Expr(e, parseAdd(), Expr.E_GEQ);
+	if (skip("!="))
+	    return new Expr(e, parseAdd(), Expr.E_NEQ);
+	if (skip("<"))
+	    return new Expr(e, parseAdd(), Expr.E_LESS);
+	if (skip(">"))
+	    return new Expr(e, parseAdd(), Expr.E_GREATER);
+	return e;
+    }
+
+    Expr parseAdd() {
 	Expr e = parseMult();
 	while (true) {
 	    if (skip("+"))
@@ -255,8 +385,10 @@ class ExprParser {
 
     Expr parseUminus() {
 	skip("+");
+	if (skip("!"))
+	    return new Expr(parseUminus(), null, Expr.E_NOT);
 	if (skip("-"))
-	    return new Expr(parsePow(), null, Expr.E_UMINUS);
+	    return new Expr(parseUminus(), null, Expr.E_UMINUS);
 	return parsePow();
     }
 
@@ -290,7 +422,7 @@ class ExprParser {
 	}
 	skipOrError(")");
 	if (args < minArgs || args > maxArgs)
-	    err = true;
+	    setError("bad number of function args: " + args);
 	return e;
     }
 
@@ -309,6 +441,24 @@ class ExprParser {
 		return new Expr(Expr.E_A + (c-'a'));
 	    }
 	}
+	if (token.startsWith("last") && token.length() == 5) {
+	    char c = token.charAt(4);
+	    if (c >= 'a' && c <= 'i') {
+		getToken();
+		return new Expr(Expr.E_LASTA + (c-'a'));
+	    }
+	}
+	if (token.endsWith("dt") && token.startsWith("d") && token.length() == 4) {
+	    char c = token.charAt(1);
+	    if (c >= 'a' && c <= 'i') {
+		getToken();
+		return new Expr(Expr.E_DADT + (c-'a'));
+	    }
+	}
+	if (skip("lastoutput"))
+	    return new Expr(Expr.E_LASTOUTPUT);
+	if (skip("timestep"))
+	    return new Expr(Expr.E_TIMESTEP);
 	if (skip("pi"))
 	    return new Expr(Expr.E_VAL, 3.14159265358979323846);
 //	if (skip("e"))
@@ -317,6 +467,18 @@ class ExprParser {
 	    return parseFunc(Expr.E_SIN);
 	if (skip("cos"))
 	    return parseFunc(Expr.E_COS);
+	if (skip("asin"))
+	    return parseFunc(Expr.E_ASIN);
+	if (skip("acos"))
+	    return parseFunc(Expr.E_ACOS);
+	if (skip("atan"))
+	    return parseFunc(Expr.E_ATAN);
+	if (skip("sinh"))
+	    return parseFunc(Expr.E_SINH);
+	if (skip("cosh"))
+	    return parseFunc(Expr.E_COSH);
+	if (skip("tanh"))
+	    return parseFunc(Expr.E_TANH);
 	if (skip("abs"))
 	    return parseFunc(Expr.E_ABS);
 	if (skip("exp"))
@@ -331,6 +493,10 @@ class ExprParser {
 	    return parseFunc(Expr.E_TRIANGLE);
 	if (skip("saw"))
 	    return parseFunc(Expr.E_SAWTOOTH);
+	if (skip("floor"))
+	    return parseFunc(Expr.E_FLOOR);
+	if (skip("ceil"))
+	    return parseFunc(Expr.E_CEIL);
 	if (skip("min"))
 	    return parseFuncMulti(Expr.E_MIN, 2, 1000);
 	if (skip("max"))
@@ -354,8 +520,10 @@ class ExprParser {
 	    getToken();
 	    return e;
 	} catch (Exception e) {
-	    err = true;
-	    CirSim.console("unrecognized token: " + token + "\n");
+	    if (token.length() == 0)
+		setError("unexpected end of input");
+	    else
+		setError("unrecognized token: " + token);
 	    return new Expr(Expr.E_VAL, 0);
 	}
     }
@@ -364,8 +532,9 @@ class ExprParser {
 	text = s.toLowerCase();
 	tlen = text.length();
 	pos = 0;
-	err = false;
+	err = null;
 	getToken();
     }
-    boolean gotError() { return err; }
+    
+    String gotError() { return err; }
 };

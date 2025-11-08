@@ -19,7 +19,10 @@
 
 package com.lushprojects.circuitjs1.client;
 
-    class VCCSElm extends ChipElm {
+import com.google.gwt.user.client.Window;
+import com.lushprojects.circuitjs1.client.util.Locale;
+
+class VCCSElm extends ChipElm {
 	double gain;
 	int inputCount;
 	Expr expr;
@@ -63,6 +66,8 @@ package com.lushprojects.circuitjs1.client;
 	}
 	String getChipName() { return "VCCS~"; } // ~ is for localization 
 	boolean nonLinear() { return true; }
+	@Override boolean isDigitalChip() { return false; }
+
 	void stamp() {
             sim.stampNonLinear(nodes[inputCount]);
             sim.stampNonLinear(nodes[inputCount+1]);
@@ -146,6 +151,9 @@ package com.lushprojects.circuitjs1.client;
             for (i = 0; i != inputCount; i++)
         	lastVolts[i] = volts[i];
         }
+        void stepFinished() {
+            exprState.updateLastValues(pins[inputCount].current);
+        }
 	void draw(Graphics g) {
 	    drawChip(g);
 	}
@@ -161,7 +169,7 @@ package com.lushprojects.circuitjs1.client;
 	    return false;
 	}
 
-        public EditInfo getEditInfo(int n) {
+        public EditInfo getChipEditInfo(int n) {
             if (n == 0) {
                 EditInfo ei = new EditInfo(EditInfo.makeLink("customfunction.html", "Output Function"), 0, -1, -1);
                 ei.text = exprString;
@@ -173,7 +181,7 @@ package com.lushprojects.circuitjs1.client;
                     setDimensionless();
             return null;
         }
-        public void setEditValue(int n, EditInfo ei) {
+        public void setChipEditValue(int n, EditInfo ei) {
             if (n == 0) {
         	exprString = ei.textf.getText();
         	parseExpr();
@@ -197,6 +205,9 @@ package com.lushprojects.circuitjs1.client;
         void parseExpr() {
             ExprParser parser = new ExprParser(exprString);
             expr = parser.parseExpression();
+            String err = parser.gotError();
+            if (err != null)
+        	Window.alert(Locale.LS("Parse error in expression") + ": " + exprString + ": " + err);
         }
         
         void getInfo(String arr[]) {
@@ -204,6 +215,11 @@ package com.lushprojects.circuitjs1.client;
             int i;
             for (i = 0; arr[i] != null; i++) ;
             arr[i] = "I = " + getCurrentText(pins[inputCount].current);
+        }
+        
+        void reset() {
+            super.reset();
+            exprState.reset();
         }
     }
 

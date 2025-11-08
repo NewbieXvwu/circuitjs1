@@ -22,7 +22,9 @@
 
 package com.lushprojects.circuitjs1.client;
 
-    class AmmeterElm extends CircuitElm {
+import com.lushprojects.circuitjs1.client.util.Locale;
+
+class AmmeterElm extends CircuitElm {
         
         int meter;
 	int scale;
@@ -39,7 +41,7 @@ package com.lushprojects.circuitjs1.client;
 
     public AmmeterElm(int xx, int yy) { 
         super(xx, yy); 
-        flags = FLAG_SHOWCURRENT;
+        flags = FLAG_SHOWCURRENT|FLAG_CIRCLE;
         scale = SCALE_AUTO;
     }
     public AmmeterElm(int xa, int ya, int xb, int yb, int f,
@@ -66,10 +68,14 @@ package com.lushprojects.circuitjs1.client;
     void setPoints(){
         super.setPoints();
         mid = interpPoint(point1,point2,0.6);
+        center = interpPoint(point1,point2,0.5);
         arrowPoly = calcArrow(point1, mid, 14, 7);
     }
+    Point center;
     Point mid;
     static final int FLAG_SHOWCURRENT = 1;
+    static final int FLAG_CIRCLE = 2;  // Add this line
+
     void stepFinished(){
         count++;//how many counts are in a cycle    
         total += current*current; //sum of squares
@@ -143,10 +149,35 @@ package com.lushprojects.circuitjs1.client;
     void draw(Graphics g) {
         super.draw(g);//BC required for highlighting
         setVoltageColor(g, volts[0]);
-        drawThickLine(g, point1, point2);
-        g.fillPolygon(arrowPoly);
+	double width = 4;
+        if (!drawAsCircle()) {
+            drawThickLine(g, point1, point2);
+            g.fillPolygon(arrowPoly);
+        } else {
+            g.setColor(needsHighlight() ? selectColor : lightGrayColor);
+            drawThickCircle(g, center.x, center.y, circleSize);
+            drawCenteredText(g, "A", center.x, center.y, true);
+
+	    calcLeads(circleSize*2);
+	    setVoltageColor(g, volts[0]);
+	    drawThickLine(g, point1, lead1);
+	    drawThickLine(g, lead2, point2);
+
+            g.setColor(whiteColor);
+            g.setFont(unitsFont);
+            double len = circleSize*2;
+            Point plusPoint = interpPoint(point1, point2, (dn/2-len/2-4)/dn, -10*dsign );
+            if (y2 > y)
+                 plusPoint.y += 4;
+             if (y > y2)
+                 plusPoint.y += 3;
+            int w = (int)g.context.measureText("+").getWidth();
+            g.drawString("+", plusPoint.x-w/2, plusPoint.y);
+	    width = circleSize;
+        }
+
         doDots(g);
-        setBbox(point1, point2, 3);
+        setBbox(point1, point2, width);
         String s = "A";
         switch (meter) {
         case AM_VOL:
@@ -157,9 +188,12 @@ package com.lushprojects.circuitjs1.client;
             break;
         }
 
-        drawValues(g, s, 4);
+        drawValues(g, s, width);
         drawPosts(g);
     }
+
+    final int circleSize = 12;
+
     int getDumpType() { return 370; }
     void stamp() {
         sim.stampVoltageSource(nodes[0], nodes[1], voltSource, 0);
@@ -181,8 +215,15 @@ package com.lushprojects.circuitjs1.client;
     }
     double getPower() { return 0; }
     double getVoltageDiff() { return volts[0]; }
-    boolean isWire() { return true; }
     
+    // do not optimize out, even though isWireEquivalent() is true
+    // (because we need current calculated every timestep)    
+    boolean isWireEquivalent() { return true; }
+    
+    boolean drawAsCircle() {
+        return (flags & FLAG_CIRCLE) != 0;
+    }
+
     public EditInfo getEditInfo(int n) {
         if (n==0){
             EditInfo ei =  new EditInfo("Value", selectedValue, -1, -1);
@@ -198,17 +239,23 @@ package com.lushprojects.circuitjs1.client;
             ei.choice.add("Auto");
             ei.choice.add("A");
             ei.choice.add("mA");
-            ei.choice.add(CirSim.muString + "A");
+            ei.choice.add(Locale.muString + "A");
             ei.choice.select(scale);
             return ei;
         }
+        if (n == 2) {
+            return EditInfo.createCheckbox("Circular Symbol", drawAsCircle());
+        }
         return null;
     }
+
     public void setEditValue(int n, EditInfo ei) {
         if (n==0)
             meter = ei.choice.getSelectedIndex();
         if (n==1)
             scale = ei.choice.getSelectedIndex();
+        if (n==2)
+            flags = ei.changeFlag(flags, FLAG_CIRCLE);
     }
 
 }

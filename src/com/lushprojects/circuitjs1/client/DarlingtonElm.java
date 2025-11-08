@@ -1,5 +1,7 @@
 package com.lushprojects.circuitjs1.client;
 
+import com.lushprojects.circuitjs1.client.util.Locale;
+
 // Test element to evaluate if constructing compound elements from individual transistors is feasible
 
 // Iain Sharp, Feb 2017
@@ -78,7 +80,7 @@ public class DarlingtonElm extends CompositeElm {
 	g.fillPolygon(rectPoly);
 
 	if ((needsHighlight() || sim.dragElm == this) && dy == 0) {
-	    g.setColor(Color.white);
+	    g.setColor(whiteColor);
 	    // IES
 	    // g.setFont(unitsFont);
 	    int ds = sign(dx);
@@ -96,7 +98,7 @@ public class DarlingtonElm extends CompositeElm {
 
 
     void getInfo(String arr[]) {
-	arr[0] = sim.LS("darlington pair") + " (" + ((pnp == -1) ? "PNP)" : "NPN)");
+	arr[0] = Locale.LS("darlington pair") + " (" + ((pnp == -1) ? "PNP)" : "NPN)");
 	double vbc = volts[0] - volts[1];
 	double vbe = volts[0] - volts[2];
 	double vce = volts[1] - volts[2];
@@ -142,7 +144,6 @@ public class DarlingtonElm extends CompositeElm {
 
     }
 
-
-    
+    boolean canFlipY() { return false; }
 
 }

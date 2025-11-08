@@ -22,6 +22,7 @@ package com.lushprojects.circuitjs1.client;
     class InductorElm extends CircuitElm {
 	Inductor ind;
 	double inductance;
+	double initialCurrent;
 	public InductorElm(int xx, int yy) {
 	    super(xx, yy);
 	    ind = new Inductor(sim);
@@ -34,11 +35,14 @@ package com.lushprojects.circuitjs1.client;
 	    ind = new Inductor(sim);
 	    inductance = new Double(st.nextToken()).doubleValue();
 	    current = new Double(st.nextToken()).doubleValue();
+	    try {
+		initialCurrent = new Double(st.nextToken()).doubleValue();
+	    } catch (Exception e) {}
 	    ind.setup(inductance, current, flags);
 	}
 	int getDumpType() { return 'l'; }
 	String dump() {
-	    return super.dump() + " " + inductance + " " + current;
+	    return super.dump() + " " + inductance + " " + current + " " + initialCurrent;
 	}
 	void setPoints() {
 	    super.setPoints();
@@ -61,8 +65,9 @@ package com.lushprojects.circuitjs1.client;
 	    drawPosts(g);
 	}
 	void reset() {
-	    current = volts[0] = volts[1] = curcount = 0;
-	    ind.reset();
+	    volts[0] = volts[1] = curcount = 0;
+	    current = initialCurrent;
+	    ind.resetTo(initialCurrent);
 	}
 	void stamp() { ind.stamp(nodes[0], nodes[1]); }
 	void startIteration() {
@@ -85,13 +90,15 @@ package com.lushprojects.circuitjs1.client;
 	}
 	public EditInfo getEditInfo(int n) {
 	    if (n == 0)
-		return new EditInfo("Inductance (H)", inductance, 0, 0);
+		return new EditInfo("Inductance (H)", inductance, 1e-2, 10);
 	    if (n == 1) {
 		EditInfo ei = new EditInfo("", 0, -1, -1);
 		ei.checkbox = new Checkbox("Trapezoidal Approximation",
 					   ind.isTrapezoidal());
 		return ei;
 	    }
+            if (n == 2)
+                return new EditInfo("Initial Current (on Reset) (A)", initialCurrent);
 	    return null;
 	}
 	
@@ -104,6 +111,8 @@ package com.lushprojects.circuitjs1.client;
 		else
 		    flags |= Inductor.FLAG_BACK_EULER;
 	    }
+            if (n == 2)
+                initialCurrent = ei.value;
 	    ind.setup(inductance, current, flags);
 	}
 	

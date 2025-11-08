@@ -1,7 +1,7 @@
 package com.lushprojects.circuitjs1.client;
 
 import com.google.gwt.user.client.ui.Button;
-import com.lushprojects.circuitjs1.client.ChipElm.Pin;
+import com.lushprojects.circuitjs1.client.util.Locale;
 
 public class CustomLogicElm extends ChipElm {
     String modelName;
@@ -28,7 +28,7 @@ public class CustomLogicElm extends ChipElm {
 	for (i = 0; i != getPostCount(); i++) {
 	    if (pins[i].output) {
 		volts[i] = new Double(st.nextToken()).doubleValue();
-		pins[i].value = volts[i] > 2.5;
+		pins[i].value = volts[i] > getThreshold();
 	    }
 	}
     }
@@ -131,7 +131,7 @@ public class CustomLogicElm extends ChipElm {
 	for (i = 0; i != getPostCount(); i++) {
 	    Pin p = pins[i];
 	    if (!p.output)
-		p.value = volts[i] > 2.5;
+		p.value = volts[i] > getThreshold();
 	}
 	execute();
 	int add = (hasTriState()) ? outputCount : 0;
@@ -139,7 +139,7 @@ public class CustomLogicElm extends ChipElm {
 	    Pin p = pins[i];
 	    if (p.output) {
 		// connect output voltage source (to internal node if tri-state, otherwise connect directly to output)
-		sim.updateVoltageSource(0, nodes[i+add], p.voltSource, p.value ? 5 : 0);
+		sim.updateVoltageSource(0, nodes[i+add], p.voltSource, p.value ? highVoltage : 0);
 		
 		// add resistor for tri-state if necessary
 		if (hasTriState())
@@ -208,31 +208,35 @@ public class CustomLogicElm extends ChipElm {
 		else
 		    pins[j+inputCount].value = (x == '1');
 	    }
-	    
-	    // save values for transition checking
-	    for (j = 0; j != postCount; j++)
-		lastValues[j] = pins[j].value;
 	    break;
 	}
+	
+	// save values for transition checking
+	int j;
+	for (j = 0; j != postCount; j++)
+	    lastValues[j] = pins[j].value;
     }
     
-    public EditInfo getEditInfo(int n) {
-	if (n == 2) {
+    public EditInfo getChipEditInfo(int n) {
+	if (n == 0) {
 	    EditInfo ei = new EditInfo("Model Name", 0, -1, -1);
 	    ei.text = modelName;
 	    ei.disallowSliders();
 	    return ei;
 	}
-	if (n == 3) {
+	if (n == 1) {
             EditInfo ei = new EditInfo("", 0, -1, -1);
-            ei.button = new Button(sim.LS("Edit Model"));
+            ei.button = new Button(Locale.LS("Edit Model"));
             return ei;
 	}
-	return super.getEditInfo(n);
+	return null;
     }
     
-    public void setEditValue(int n, EditInfo ei) {
-	if (n == 2) {
+    public void setChipEditValue(int n, EditInfo ei) {
+	if (n == 0) {
+	    String newModelName = ei.textf.getText();
+	    if (modelName.equals(newModelName))
+		return;
 	    modelName = lastModelName = ei.textf.getText();
 	    model = CustomLogicModel.getModelWithNameOrCopy(modelName, model);
 	    setupPins();
@@ -240,15 +244,12 @@ public class CustomLogicElm extends ChipElm {
 	    setPoints();
 	    return;
 	}
-	if (n == 3)
-	{
+	if (n == 1) {
 	    EditDialog editDialog = new EditDialog(model, sim);
 	    CirSim.customLogicEditDialog = editDialog;
 	    editDialog.show();
 	    return;
 	}
-	
-	super.setEditValue(n, ei);
     }
     
     int getDumpType() { return 208; }

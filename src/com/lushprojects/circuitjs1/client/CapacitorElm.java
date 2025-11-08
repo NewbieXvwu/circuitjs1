@@ -19,12 +19,17 @@
 
 package com.lushprojects.circuitjs1.client;
 
-    class CapacitorElm extends CircuitElm {
+import com.lushprojects.circuitjs1.client.util.Locale;
+
+class CapacitorElm extends CircuitElm {
 	double capacitance;
-	double compResistance, voltdiff;
+	double compResistance, voltdiff, seriesResistance;
 	double initialVoltage;
+	int capNode2;
 	Point plate1[], plate2[];
 	public static final int FLAG_BACK_EULER = 2;
+	public static final int FLAG_RESISTANCE = 4;
+
 	public CapacitorElm(int xx, int yy) {
 	    super(xx, yy);
 	    capacitance = 1e-5;
@@ -38,13 +43,14 @@ package com.lushprojects.circuitjs1.client;
 	    initialVoltage = 1e-3;
 	    try {
 		initialVoltage = new Double(st.nextToken()).doubleValue();
+		if ((flags & FLAG_RESISTANCE) != 0)
+		    seriesResistance = new Double(st.nextToken()).doubleValue();
+
+		// if you add more things here, check PolarCapacitorElm.  It loads more state after this
 	    } catch (Exception e) {}
 	}
 	boolean isTrapezoidal() { return (flags & FLAG_BACK_EULER) == 0; }
-	void setNodeVoltage(int n, double c) {
-	    super.setNodeVoltage(n, c);
-	    voltdiff = volts[0]-volts[1];
-	}
+	
 	void reset() {
 	    super.reset();
 	    current = curcount = curSourceValue = 0;
@@ -56,8 +62,10 @@ package com.lushprojects.circuitjs1.client;
 	    voltdiff = current = curcount = curSourceValue = 0;
 	}
 	int getDumpType() { return 'c'; }
+
 	String dump() {
-	    return super.dump() + " " + capacitance + " " + voltdiff + " " + initialVoltage;
+	    flags |= FLAG_RESISTANCE;
+	    return super.dump() + " " + capacitance + " " + voltdiff + " " + initialVoltage + " " + seriesResistance;
 	}
 	
 	// used for PolarCapacitorElm
@@ -96,7 +104,7 @@ package com.lushprojects.circuitjs1.client;
 		drawThickLine(g, plate2[0], plate2[1]);
 	    else {
 		int i;
-		for (i = 0; i != 7; i++)
+		for (i = 0; i != platePoints.length-1; i++)
 		    drawThickLine(g,  platePoints[i], platePoints[i+1]);
 	    }
 	    
@@ -116,9 +124,16 @@ package com.lushprojects.circuitjs1.client;
 		// when finding DC operating point, replace cap with a 100M resistor
 		sim.stampResistor(nodes[0], nodes[1], 1e8);
 		curSourceValue = 0;
+		capNode2 = 1;
 		return;
 	    }
 	    
+	    // The capacitor model is between nodes 0 and capNode2.  For an
+	    // ideal capacitor, capNode2 is node 1.  If series resistance, capNode2 = 2
+	    // and we place a resistor between nodes 2 and 1.
+	    // 2 is an internal node, 0 and 1 are the capacitor terminals.
+	    capNode2 = (seriesResistance > 0) ? 2 : 1;
+
 	    // capacitor companion model using trapezoidal approximation
 	    // (Norton equivalent) consists of a current source in
 	    // parallel with a resistor.  Trapezoidal is more accurate
@@ -128,9 +143,11 @@ package com.lushprojects.circuitjs1.client;
 		compResistance = sim.timeStep/(2*capacitance);
 	    else
 		compResistance = sim.timeStep/capacitance;
-	    sim.stampResistor(nodes[0], nodes[1], compResistance);
+	    sim.stampResistor(nodes[0], nodes[capNode2], compResistance);
 	    sim.stampRightSide(nodes[0]);
-	    sim.stampRightSide(nodes[1]);
+	    sim.stampRightSide(nodes[capNode2]);
+	    if (seriesResistance > 0)
+		sim.stampResistor(nodes[1], nodes[2], seriesResistance);
 	}
 	void startIteration() {
 	    if (isTrapezoidal())
@@ -138,8 +155,21 @@ package com.lushprojects.circuitjs1.client;
 	    else
 		curSourceValue = -voltdiff/compResistance;
 	}
+	
+	void stepFinished() {
+	    voltdiff = volts[0]-volts[capNode2];
+	    calculateCurrent();
+	}
+	
+	void setNodeVoltage(int n, double c) {
+	    // do not calculate current, that only gets done in stepFinished().  otherwise calculateCurrent() may get
+	    // called while stamping the circuit, which might discharge the cap (since we use that current to calculate
+	    // curSourceValue in startIteration)
+	    volts[n] = c;
+	}	
+	
 	void calculateCurrent() {
-	    double voltdiff = volts[0] - volts[1];
+	    double voltdiff = volts[0] - volts[capNode2];
 	    if (sim.dcAnalysisFlag) {
 		current = voltdiff/1e8;
 		return;
@@ -154,8 +184,9 @@ package com.lushprojects.circuitjs1.client;
 	void doStep() {
 	    if (sim.dcAnalysisFlag)
 		return;
-	    sim.stampCurrentSource(nodes[0], nodes[1], curSourceValue);
+	    sim.stampCurrentSource(nodes[0], nodes[capNode2], curSourceValue);
  	}
+	int getInternalNodeCount() { return (!sim.dcAnalysisFlag && seriesResistance > 0) ? 1 : 0; }
 	void getInfo(String arr[]) {
 	    arr[0] = "capacitor";
 	    getBasicInfo(arr);
@@ -166,11 +197,11 @@ package com.lushprojects.circuitjs1.client;
 	}
 	@Override
 	String getScopeText(int v) {
-	    return sim.LS("capacitor") + ", " + getUnitText(capacitance, "F");
+	    return Locale.LS("capacitor") + ", " + getUnitText(capacitance, "F");
 	}
 	public EditInfo getEditInfo(int n) {
 	    if (n == 0)
-		return new EditInfo("Capacitance (F)", capacitance, 0, 0);
+		return new EditInfo("Capacitance (F)", capacitance, 1e-6, 1e-3);
 	    if (n == 1) {
 		EditInfo ei = new EditInfo("", 0, -1, -1);
 		ei.checkbox = new Checkbox("Trapezoidal Approximation", isTrapezoidal());
@@ -178,11 +209,14 @@ package com.lushprojects.circuitjs1.client;
 	    }
 	    if (n == 2)
 		return new EditInfo("Initial Voltage (on Reset)", initialVoltage);
+	    if (n == 3)
+		return new EditInfo("Series Resistance (0 = infinite)", seriesResistance);
+	    // if you add more things here, check PolarCapacitorElm
 	    return null;
 	}
 	public void setEditValue(int n, EditInfo ei) {
-	    if (n == 0 && ei.value > 0)
-		capacitance = ei.value;
+	    if (n == 0)
+		capacitance = (ei.value > 0) ? ei.value : 1e-12;
 	    if (n == 1) {
 		if (ei.checkbox.getState())
 		    flags &= ~FLAG_BACK_EULER;
@@ -191,8 +225,13 @@ package com.lushprojects.circuitjs1.client;
 	    }
 	    if (n == 2)
 		initialVoltage = ei.value;
+	    if (n == 3)
+		seriesResistance = ei.value;
 	}
 	int getShortcut() { return 'c'; }
 	public double getCapacitance() { return capacitance; }
+	public double getSeriesResistance() { return seriesResistance; }
 	public void setCapacitance(double c) { capacitance = c; }
+	public void setSeriesResistance(double c) { seriesResistance = c; }
+	public boolean isIdealCapacitor() { return (seriesResistance == 0); }
     }

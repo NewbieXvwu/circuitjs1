@@ -21,11 +21,13 @@ package com.lushprojects.circuitjs1.client;
 
 import java.util.Vector;
 
+import com.lushprojects.circuitjs1.client.util.Locale;
+
 class TextElm extends GraphicElm {
     String text;
     Vector<String> lines;
     int size;
-    final int FLAG_CENTER = 1;
+//    final int FLAG_CENTER = 1;
     final int FLAG_BAR = 2;
     final int FLAG_ESCAPE = 4;
     public TextElm(int xx, int yy) {
@@ -86,8 +88,8 @@ class TextElm extends GraphicElm {
 	//Graphics2D g2 = (Graphics2D)g;
 	//g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 	//	RenderingHints.VALUE_ANTIALIAS_ON);
-	Font oldfont = g.getFont();
-    g.setColor(needsHighlight() ? selectColor : lightGrayColor);
+	g.save();
+	g.setColor(needsHighlight() ? selectColor : lightGrayColor);
 	Font f = new Font("SansSerif", 0, size);
 	g.setFont(f);
 //	FontMetrics fm = g.getFontMetrics();
@@ -103,10 +105,8 @@ class TextElm extends GraphicElm {
 	setBbox(x, y, x, y);
 	for (i = 0; i != lines.size(); i++) {
 	    String s = (String) (lines.elementAt(i));
-	    s = CirSim.LS(s);
+	    s = Locale.LS(s);
 	    int sw=(int)g.context.measureText(s).getWidth();
-	    if ((flags & FLAG_CENTER) != 0)
-		x = (g.context.getCanvas().getWidth()-sw)/2;
 	    g.drawString(s, x, cury);
 	    if ((flags & FLAG_BAR) != 0) {
 		int by = cury-g.currentFontSize;
@@ -118,7 +118,7 @@ class TextElm extends GraphicElm {
 	}
 	x2 = boundingBox.x + boundingBox.width;
 	y2 = boundingBox.y + boundingBox.height;
-	g.setFont(oldfont);
+	g.restore();
     }
     public EditInfo getEditInfo(int n) {
 	if (n == 0) {
@@ -129,12 +129,6 @@ class TextElm extends GraphicElm {
 	if (n == 1)
 	    return new EditInfo("Size", size, 5, 100);
 	if (n == 2) {
-	    EditInfo ei = new EditInfo("", 0, -1, -1);
-	    ei.checkbox =
-		new Checkbox("Center", (flags & FLAG_CENTER) != 0);
-	    return ei;
-	}
-	if (n == 3) {
 	    EditInfo ei = new EditInfo("", 0, -1, -1);
 	    ei.checkbox =
 		new Checkbox("Draw Bar On Top", (flags & FLAG_BAR) != 0);
@@ -149,20 +143,14 @@ class TextElm extends GraphicElm {
 	}
 	if (n == 1)
 	    size = (int) ei.value;
-	if (n == 3) {
+	if (n == 2) {
 	    if (ei.checkbox.getState())
 		flags |= FLAG_BAR;
 	    else
 		flags &= ~FLAG_BAR;
 	}
-	if (n == 2) {
-	    if (ei.checkbox.getState())
-		flags |= FLAG_CENTER;
-	    else
-		flags &= ~FLAG_CENTER;
-	}
     }
-    boolean isCenteredText() { return (flags & FLAG_CENTER) != 0; }
+//    boolean isCenteredText() { return (flags & FLAG_CENTER) != 0; }
     void getInfo(String arr[]) {
 	arr[0] = text;
     }

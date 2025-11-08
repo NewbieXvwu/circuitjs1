@@ -21,8 +21,6 @@ package com.lushprojects.circuitjs1.client;
 
 import java.util.Vector;
 
-import com.lushprojects.circuitjs1.client.ChipElm.Pin;
-
 class CCVSElm extends VCCSElm {
     	static int FLAG_SPICE = 2;
     	VoltageElm voltageSources[];
@@ -140,6 +138,10 @@ class CCVSElm extends VCCSElm {
         	lastCurrents[i] = pins[i*2+1].current;
         }
 	
+        void stepFinished() {
+            exprState.updateLastValues(volts[inputCount]-volts[inputCount+1]);
+        }
+
         void setCurrentExprValue(int n, double cur) {
             // set i to current for backward compatibility
             if (n == 0 && inputPairCount < 9)
@@ -165,14 +167,15 @@ class CCVSElm extends VCCSElm {
         		pins[i+1].current = c;
         		return;
         	    }
-            }
+            } else
+        	i = inputCount;
             if (pins[i].voltSource == vn) {
                 pins[i].current = c;
                 pins[i+1].current = -c;
             }
         }
         
-        public void setEditValue(int n, EditInfo ei) {
+        public void setChipEditValue(int n, EditInfo ei) {
             if (n == 1) {
         	// make sure number of inputs is even
                 if (ei.value < 0 || ei.value > 8 || (ei.value % 2) == 1)
@@ -182,7 +185,7 @@ class CCVSElm extends VCCSElm {
                 allocNodes();
                 setPoints();
             } else
-        	super.setEditValue(n, ei);
+        	super.setChipEditValue(n, ei);
         }
 
         void setParentList(Vector<CircuitElm> elmList) {
@@ -198,7 +201,7 @@ class CCVSElm extends VCCSElm {
         	    CircuitElm ce = elmList.get(j);
         	    if (!(ce instanceof VoltageElm))
         		continue;
-        	    if (ce.getNode(1) == nodes[i] && ce.getNode(0) == nodes[i+1])
+        	    if (ce.getNode(0) == nodes[i] && ce.getNode(1) == nodes[i+1])
         		voltageSources[i/2] = (VoltageElm)ce;
         	}
             }
@@ -210,6 +213,17 @@ class CCVSElm extends VCCSElm {
 	    else
 		super.setVoltageSource(j, vs);
 	}
+
+        void getInfo(String arr[]) {
+            super.getInfo(arr);
+            int i = 1;
+            int j;
+            for (j = 0; j != inputCount; j += 2)
+        	arr[i++] = pins[j].text + " = " + getCurrentText(-pins[j].current);
+            arr[i++] = pins[j].text + " = " + getVoltageText(volts[j]) + "; " + pins[j+1].text + " = " + getVoltageText(volts[j+1]);
+            arr[i++] = "I = " + getCurrentText(pins[j].current);
+            arr[i++] = null;
+        }
 
     }
 

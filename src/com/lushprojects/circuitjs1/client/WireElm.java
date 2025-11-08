@@ -20,8 +20,6 @@
 package com.lushprojects.circuitjs1.client;
 
     class WireElm extends CircuitElm {
-	boolean hasWireInfo; // used in CirSim to calculate wire currents
-	
 	public WireElm(int xx, int yy) { super(xx, yy); }
 	public WireElm(int xa, int ya, int xb, int yb, int f,
 		       StringTokenizer st) {
@@ -62,7 +60,8 @@ package com.lushprojects.circuitjs1.client;
 	int getDumpType() { return 'w'; }
 	double getPower() { return 0; }
 	double getVoltageDiff() { return volts[0]; }
-	boolean isWire() { return true; }
+	boolean isWireEquivalent() { return true; }
+	boolean isRemovableWire() { return true; }
 	public EditInfo getEditInfo(int n) {
 	    if (n == 0) {
 		EditInfo ei = new EditInfo("", 0, -1, -1);
@@ -91,4 +90,13 @@ package com.lushprojects.circuitjs1.client;
 	    }
 	}
         int getShortcut() { return 'w'; }
+
+	int getMouseDistance(int gx, int gy) {
+	    int thresh = 10;
+	    int d2 = lineDistanceSq(x, y, x2, y2, gx, gy);
+	    if (d2 <= thresh*thresh)
+		return d2;
+	    return -1;
+	}
+
     }

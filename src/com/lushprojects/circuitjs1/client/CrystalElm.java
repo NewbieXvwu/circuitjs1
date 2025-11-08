@@ -19,7 +19,9 @@
 
 package com.lushprojects.circuitjs1.client;
 
-    class CrystalElm extends CompositeElm {
+import com.lushprojects.circuitjs1.client.util.Locale;
+
+class CrystalElm extends CompositeElm {
 	double seriesCapacitance, parallelCapacitance;
 	double inductance, resistance;
 	Point plate1[], plate2[];
@@ -117,13 +119,15 @@ package com.lushprojects.circuitjs1.client;
 	    drawPosts(g);
 	}
 	
-	void calculateCurrent() {
+	public void stepFinished() {
+	    super.stepFinished();
 	    current = getCurrentIntoNode(1);
 	}
 	
 	void getInfo(String arr[]) {
 	    arr[0] = "crystal";
 	    getBasicInfo(arr);
+	    arr[3] = "fs = " + getUnitText(1/(Math.sqrt(inductance*seriesCapacitance)*Math.PI*2), "Hz");
 //	    arr[3] = "C = " + getUnitText(capacitance, "F");
 //	    arr[4] = "P = " + getUnitText(getPower(), "W");
 	    //double v = getVoltageDiff();
@@ -140,7 +144,7 @@ package com.lushprojects.circuitjs1.client;
 	    if (n == 2)
 		return new EditInfo("Inductance (H)", inductance, 0, 0);
 	    if (n == 3)
-		return new EditInfo("Resistance (" + CirSim.ohmString + ")", resistance, 0, 0);
+		return new EditInfo("Resistance (" + Locale.ohmString + ")", resistance, 0, 0);
 	    return null;
 	}
 	public void setEditValue(int n, EditInfo ei) {

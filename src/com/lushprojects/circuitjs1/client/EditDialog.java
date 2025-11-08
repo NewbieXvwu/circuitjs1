@@ -20,10 +20,10 @@
 package com.lushprojects.circuitjs1.client;
 
 
-import com.google.gwt.user.client.ui.DialogBox;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.VerticalPanel;
+import com.lushprojects.circuitjs1.client.util.Locale;
 import com.google.gwt.user.client.ui.HorizontalPanel;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.ClickEvent;
@@ -31,6 +31,7 @@ import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.TextBox;
 import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.event.dom.client.ChangeHandler;
+import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.logical.shared.ValueChangeHandler;
 import com.google.gwt.event.logical.shared.ValueChangeEvent;
@@ -42,53 +43,51 @@ interface Editable {
     void setEditValue(int n, EditInfo ei);
 }
 
-// class EditDialog extends Dialog implements AdjustmentListener, ActionListener, ItemListener {
-class EditDialog extends DialogBox  {
+class EditDialog extends Dialog {
 	Editable elm;
 	CirSim cframe;
 	Button applyButton, okButton, cancelButton;
 	EditInfo einfos[];
 	int einfocount;
 	final int barmax = 1000;
-	VerticalPanel vp;
-	HorizontalPanel hp;
-	boolean closeOnEnter = true;
+	VerticalPanel mainPanel;
+	HorizontalPanel bottomButtonPanel;
 	static NumberFormat noCommaFormat = NumberFormat.getFormat("####.##########");
 
 	EditDialog(Editable ce, CirSim f) {
 //		super(f, "Edit Component", false);
 		super(); // Do we need this?
-		setText(CirSim.LS("Edit Component"));
+		setText(Locale.LS("Edit Component"));
 		cframe = f;
 		elm = ce;
 //		setLayout(new EditDialogLayout());
-		vp=new VerticalPanel();
-		setWidget(vp);
+		mainPanel=new VerticalPanel();
+		setWidget(mainPanel);
 		einfos = new EditInfo[10];
 //		noCommaFormat = DecimalFormat.getInstance();
 //		noCommaFormat.setMaximumFractionDigits(10);
 //		noCommaFormat.setGroupingUsed(false);
-		hp=new HorizontalPanel();
-		hp.setWidth("100%");
-		hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
-		hp.setStyleName("topSpace");
-		vp.add(hp);
-		applyButton = new Button(CirSim.LS("Apply"));
-		hp.add(applyButton);
+		bottomButtonPanel = new HorizontalPanel();
+		bottomButtonPanel.setWidth("100%");
+		bottomButtonPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_LEFT);
+		bottomButtonPanel.setStyleName("topSpace");
+		mainPanel.add(bottomButtonPanel);
+		applyButton = new Button(Locale.LS("Apply"));
+		bottomButtonPanel.add(applyButton);
 		applyButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				apply();
 			}
 		});
-		hp.add(okButton = new Button(CirSim.LS("OK")));
+		bottomButtonPanel.add(okButton = new Button(Locale.LS("OK")));
 		okButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				apply();
 				closeDialog();
 			}
 		});
-		hp.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
-		hp.add(cancelButton = new Button(CirSim.LS("Cancel")));
+		bottomButtonPanel.setHorizontalAlignment(HasHorizontalAlignment.ALIGN_RIGHT);
+		bottomButtonPanel.add(cancelButton = new Button(Locale.LS("Cancel")));
 		cancelButton.addClickHandler(new ClickHandler() {
 			public void onClick(ClickEvent event) {
 				closeDialog();
@@ -100,55 +99,75 @@ class EditDialog extends DialogBox  {
 	
 	void buildDialog() {
 		int i;
-		int idx;
+		HorizontalPanel hp = new HorizontalPanel();
+		VerticalPanel vp = new VerticalPanel();
+		mainPanel.insert(hp, mainPanel.getWidgetIndex(bottomButtonPanel));
+		hp.add(vp);
 		for (i = 0; ; i++) {
 			Label l = null;
 			einfos[i] = elm.getEditInfo(i);
 			if (einfos[i] == null)
 				break;
-			EditInfo ei = einfos[i];
-			idx = vp.getWidgetIndex(hp);
-			String name = CirSim.LS(ei.name);
+			final EditInfo ei = einfos[i];
+			String name = Locale.LS(ei.name);
 			if (ei.name.startsWith("<"))
-			    vp.insert(l = new HTML(name),idx);
+			    vp.add(l = new HTML(name));
 			else
-			    vp.insert(l = new Label(name),idx);
+			    vp.add(l = new Label(name));
 			if (i!=0 && l != null)
 				l.setStyleName("topSpace");
-			idx = vp.getWidgetIndex(hp);
 			if (ei.choice != null) {
-				vp.insert(ei.choice,idx);
+				vp.add(ei.choice);
 				ei.choice.addChangeHandler( new ChangeHandler() {
 					public void onChange(ChangeEvent e){
 						itemStateChanged(e);
 					}
 				});
 			} else if (ei.checkbox != null) {
-				vp.insert(ei.checkbox,idx);
+				vp.add(ei.checkbox);
 				ei.checkbox.addValueChangeHandler( new ValueChangeHandler<Boolean>() {
 					public void onValueChange(ValueChangeEvent<Boolean> e){
 						itemStateChanged(e);
 					}
 				});
 			} else if (ei.button != null) {
-			    vp.insert(ei.button, idx);
-			    ei.button.addClickHandler( new ClickHandler() {
-				public void onClick(ClickEvent event) {
-				    itemStateChanged(event);
-				}
-			    });
+			    vp.add(ei.button);
+			    if (ei.loadFile != null) {
+			    	//Open file dialog
+			    	vp.add(ei.loadFile);
+				    ei.button.addClickHandler( new ClickHandler() {
+						public void onClick(ClickEvent event) {
+					    	ei.loadFile.open();
+						}
+				    });
+			    } else {
+			    	//Normal button press
+				    ei.button.addClickHandler( new ClickHandler() {
+						public void onClick(ClickEvent event) {
+						    itemStateChanged(event);
+						}
+				    });
+			    }
 			} else if (ei.textArea != null) {
-			    vp.insert(ei.textArea, idx);
+			    vp.add(ei.textArea);
 			    closeOnEnter = false;
 			} else if (ei.widget != null) {
-			    vp.insert(ei.widget, idx);
+			    vp.add(ei.widget);
 			} else {
-				vp.insert(ei.textf = new TextBox(), idx);
-				if (ei.text != null)
-					ei.textf.setText(ei.text);
-				if (ei.text == null) {
-					ei.textf.setText(unitString(ei));
-				}
+			    vp.add(ei.textf = new TextBox());
+			    if (ei.text != null) {
+				ei.textf.setText(ei.text);
+				ei.textf.setVisibleLength(50);
+			    }
+			    if (ei.text == null) {
+				ei.textf.setText(unitString(ei));
+			    }
+			}
+			if (vp.getWidgetCount() > 15) {
+			    // start a new column
+			    vp = new VerticalPanel();
+			    hp.add(vp);
+			    vp.getElement().getStyle().setPaddingLeft(10, Unit.PX);
 			}
 		}
 		einfocount = i;
@@ -294,22 +313,17 @@ class EditDialog extends DialogBox  {
 	}
 	
 	public void clearDialog() {
-		while (vp.getWidget(0)!=hp)
-			vp.remove(0);
+		while (mainPanel.getWidget(0)!=bottomButtonPanel)
+			mainPanel.remove(0);
 	}
 	
-	protected void closeDialog()
+	public void closeDialog()
 	{
-		EditDialog.this.hide();
-		if (cframe.editDialog == this)
-		    cframe.editDialog = null;
-	}
-	
-	public void enterPressed() {
-	    if (closeOnEnter) {
-		apply();
-		closeDialog();
-	    }
+		super.closeDialog();
+		if (CirSim.editDialog == this)
+		    CirSim.editDialog = null;
+		if (CirSim.customLogicEditDialog == this)
+		    CirSim.customLogicEditDialog = null;
 	}
 }
 

@@ -83,6 +83,8 @@ public abstract class CompositeElm extends CircuitElm {
 		int flags = new Integer(stCe.nextToken()).intValue();
 		newce = CirSim.createCe(tint, 0, 0, 0, 0, flags, stCe);
 	    }
+	    if (newce instanceof GroundElm)
+		((GroundElm) newce).setOldStyle();
 	    compElmList.add(newce);
 
 	    int thisPost = 0;
@@ -164,8 +166,10 @@ public abstract class CompositeElm extends CircuitElm {
     }
 
     public boolean nonLinear() {
-	return true; // Lets assume that any useful composite elements are
-		     // non-linear
+	for (int i = 0; i < compElmList.size(); i++)
+	    if (compElmList.get(i).nonLinear())
+		return true;
+	return false;
     }
 
     public String dump() {
@@ -203,7 +207,7 @@ public abstract class CompositeElm extends CircuitElm {
     }
 
     // are n1 and n2 connected internally somehow?
-    public boolean getConnection(int n1, int n2) {
+    public boolean getConnectionSlow(int n1, int n2) {
 	Vector<Integer> connectedNodes = new Vector<Integer>();
 
 	// keep list of nodes connected to n1
@@ -238,8 +242,35 @@ public abstract class CompositeElm extends CircuitElm {
 	return false;
     }
     
+    HashMap<IntPair, Boolean> connectionMap;
+    HashMap<Integer, Boolean> groundConnectionMap;
+
+    public boolean getConnection(int n1, int n2) {
+	if (connectionMap == null)
+	    connectionMap = new HashMap<IntPair, Boolean>();
+	IntPair key = new IntPair(n1, n2);
+	Boolean result = connectionMap.get(key);
+	if (result != null)
+	    return result;
+	result = getConnectionSlow(n1, n2);
+	connectionMap.put(key, result);
+	return result;
+    }
+
     // is n1 connected to ground somehow?
     public boolean hasGroundConnection(int n1) {
+	if (groundConnectionMap == null)
+	    groundConnectionMap = new HashMap<Integer, Boolean>();
+	Integer key = n1;
+	Boolean result = groundConnectionMap.get(key);
+	if (result != null)
+	   return result;
+	result = hasGroundConnectionSlow(n1);
+	groundConnectionMap.put(key, result);
+	return result;
+    }
+
+    public boolean hasGroundConnectionSlow(int n1) {
 	Vector<Integer> connectedNodes = new Vector<Integer>();
 
 	// keep list of nodes connected to n1

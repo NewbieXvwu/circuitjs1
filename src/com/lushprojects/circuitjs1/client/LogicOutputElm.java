@@ -51,16 +51,17 @@ package com.lushprojects.circuitjs1.client;
 	    lead1 = interpPoint(point1, point2, 1-12/dn);
 	}
 	void draw(Graphics g) {
-		Font oldf=g.getFont();
+	    g.save();
 	    Font f = new Font("SansSerif", Font.BOLD, 20);
 	    g.setFont(f);
 	    //g.setColor(needsHighlight() ? selectColor : lightGrayColor);
 	    g.setColor(lightGrayColor);
 	    String s = (volts[0] < threshold) ? "L" : "H";
 	    if (isTernary()) {
-		if (volts[0] > 3.75)
+		// we don't have 2 separate thresholds for ternary inputs so we do this instead
+		if (volts[0] > threshold * 1.5)   // 3.75 V
 		    s = "2";
-		else if (volts[0] > 1.25)
+		else if (volts[0] > threshold * .5)  // 1.25 V
 		    s = "1";
 		else
 		    s = "0";
@@ -72,7 +73,7 @@ package com.lushprojects.circuitjs1.client;
 	    setVoltageColor(g, volts[0]);
 	    drawThickLine(g, point1, lead1);
 	    drawPosts(g);
-	    g.setFont(oldf);
+	    g.restore();
 	}
 	void stamp() {
 	    if (needsPullDown())
@@ -111,7 +112,7 @@ package com.lushprojects.circuitjs1.client;
 		threshold = ei.value;
 	    if (n == 1) {
 		if (ei.checkbox.getState())
-		    flags = FLAG_PULLDOWN;
+		    flags |= FLAG_PULLDOWN;
 		else
 		    flags &= ~FLAG_PULLDOWN;
 	    }

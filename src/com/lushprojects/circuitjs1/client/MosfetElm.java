@@ -19,7 +19,9 @@
 
 package com.lushprojects.circuitjs1.client;
 
-    class MosfetElm extends CircuitElm {
+import com.lushprojects.circuitjs1.client.util.Locale;
+
+class MosfetElm extends CircuitElm {
 	int pnp;
 	int FLAG_PNP = 1;
 	int FLAG_SHOWVT = 2;
@@ -93,6 +95,7 @@ package com.lushprojects.circuitjs1.client;
 	boolean doBodyDiode() { return (flags & FLAG_BODY_DIODE) != 0 && showBulk(); }
 	void reset() {
 	    lastv1 = lastv2 = volts[0] = volts[1] = volts[2] = curcount = 0;
+	    curcount_body1 = curcount_body2 = 0;
 	    diodeB1.reset();
 	    diodeB2.reset();
 	    if (doBodyDiode())
@@ -185,7 +188,7 @@ package com.lushprojects.circuitjs1.client;
 		
 		// label pins when highlighted
 		if (needsHighlight() || sim.dragElm == this) {
-		    g.setColor(Color.white);
+		    g.setColor(whiteColor);
 		    g.setFont(unitsFont);
 
 		    // make fiddly adjustments to pin label locations depending on orientation
@@ -432,15 +435,14 @@ package com.lushprojects.circuitjs1.client;
 	    sim.stampRightSide(nodes[source], -rs);
 	}
 	
-	@SuppressWarnings("static-access")
 	void getFetInfo(String arr[], String n) {
-	    arr[0] = sim.LS(((pnp == -1) ? "p-" : "n-") + n);
+	    arr[0] = Locale.LS(((pnp == -1) ? "p-" : "n-") + n);
 	    arr[0] += " (Vt=" + getVoltageText(pnp*vt);
 	    arr[0] += ", \u03b2=" + beta + ")";
 	    arr[1] = ((pnp == 1) ? "Ids = " : "Isd = ") + getCurrentText(ids);
 	    arr[2] = "Vgs = " + getVoltageText(volts[0]-volts[pnp == -1 ? 2 : 1]);
 	    arr[3] = ((pnp == 1) ? "Vds = " : "Vsd = ") + getVoltageText(volts[2]-volts[1]);
-	    arr[4] = sim.LS((mode == 0) ? "off" :
+	    arr[4] = Locale.LS((mode == 0) ? "off" :
 		(mode == 1) ? "linear" : "saturation");
 	    arr[5] = "gm = " + getUnitText(gm, "A/V");
 	    arr[6] = "P = " + getUnitText(getPower(), "W");
@@ -451,7 +453,7 @@ package com.lushprojects.circuitjs1.client;
 	    getFetInfo(arr, "MOSFET");
 	}
 	@Override String getScopeText(int v) { 
-	    return sim.LS(((pnp == -1) ? "p-" : "n-") + "MOSFET");
+	    return Locale.LS(((pnp == -1) ? "p-" : "n-") + "MOSFET");
 	}
 	boolean canViewInScope() { return true; }
 	double getVoltageDiff() { return volts[2] - volts[1]; }
@@ -533,4 +535,21 @@ package com.lushprojects.circuitjs1.client;
 		return ids + diodeCurrent1;
 	    return -ids + diodeCurrent2;
 	}
+
+        void flipX(int c2, int count) {
+            if (x == x2)
+                flags ^= FLAG_FLIP;
+            super.flipX(c2, count);
+        }
+
+        void flipY(int c2, int count) {
+            if (y == y2)
+                flags ^= FLAG_FLIP;
+            super.flipY(c2, count);
+        }
+
+        void flipXY(int xmy, int count) {
+	    flags ^= FLAG_FLIP;
+            super.flipXY(xmy, count);
+        }
     }

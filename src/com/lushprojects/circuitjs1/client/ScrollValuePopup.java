@@ -45,7 +45,7 @@ public class ScrollValuePopup extends PopupPanel implements MouseOutHandler, Mou
 	VerticalPanel vp;
 	CircuitElm myElm;
 	Label labels[];
-	int deltaY;
+	double deltaY;
 	String name;
 	EditInfo inf;
 	CirSim sim;
@@ -89,8 +89,8 @@ public class ScrollValuePopup extends PopupPanel implements MouseOutHandler, Mou
 	
 	private void setupValues() {
 		if (myElm instanceof ResistorElm) {
-			minpow=0;
-			maxpow=6;
+			minpow=-1;
+			maxpow=7;
 		} 
 		if (myElm instanceof CapacitorElm) {
 			minpow=-11;
@@ -184,12 +184,10 @@ public class ScrollValuePopup extends PopupPanel implements MouseOutHandler, Mou
 //    		close(true);
 //    }
     
+    static final int scale = 6;
+
     public void doDeltaY(int dy) {
-    	deltaY+=dy;
-    	if (currentidx+deltaY/3 < 0)
-    		deltaY=-3*currentidx;
-    	if (currentidx+deltaY/3>=nvalues)
-    		deltaY= (nvalues-currentidx-1)*3;
+    	deltaY += (dy/(double) getDevicePixelRatio());
     	setElmValue();
     	setupLabels();
     }
@@ -209,9 +207,11 @@ public class ScrollValuePopup extends PopupPanel implements MouseOutHandler, Mou
     	}
     }
     
+    native double getDevicePixelRatio() /*-{ return window.devicePixelRatio || 1; }-*/;
+
     public int getSelIdx() {
     	int r;
-    	r=currentidx+deltaY/3;
+    	r = currentidx + (int)Math.round(sim.wheelSensitivity*deltaY/scale);
     	if (r<0)
     		r=0;
     	if (r>=nvalues)

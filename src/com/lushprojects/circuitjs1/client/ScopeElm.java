@@ -19,8 +19,6 @@
 
 package com.lushprojects.circuitjs1.client;
 
-import java.util.Vector;
-
 class ScopeElm extends CircuitElm {
     
     Scope elmScope;
@@ -89,8 +87,11 @@ class ScopeElm extends CircuitElm {
     int getDumpType() { return 403; }
 
     public String dump() {
-	String dumpStr=super.dump();
-	String sStr = elmScope.dump().replace(' ', '_');
+	String dumpStr = super.dump();
+	String elmDump = elmScope.dump();
+	if (elmDump == null)
+	    return null;
+	String sStr = elmDump.replace(' ', '_');
 	sStr = sStr.replaceFirst("o_", ""); // remove unused prefix for embedded Scope
 	return dumpStr + " " + sStr;
     }
@@ -98,8 +99,13 @@ class ScopeElm extends CircuitElm {
     void draw(Graphics g) {
 	g.setColor(needsHighlight() ? selectColor : whiteColor);
 	g.context.save();
-	g.context.setTransform(1, 0, 0, 1, 0, 0);
+	// setTransform() doesn't work in version of canvas2svg we are using
+	g.context.scale(1/sim.transform[0], 1/sim.transform[3]);
+	g.context.translate(-sim.transform[4], -sim.transform[5]);
+	//g.context.scale(CirSim.devicePixelRatio(), CirSim.devicePixelRatio());
+
 	setScopeRect();
+	elmScope.position = -1;
 	elmScope.draw(g);
 	g.context.restore();
 	setBbox(point1, point2, 0);
@@ -108,6 +114,7 @@ class ScopeElm extends CircuitElm {
     }
     
     int getPostCount() { return 0; }
+    int getNumHandles() { return 2; }
     
-    
+    void selectScope(int mx, int my) { elmScope.selectScope(mx, my); }
 }

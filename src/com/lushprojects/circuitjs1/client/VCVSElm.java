@@ -23,18 +23,9 @@ package com.lushprojects.circuitjs1.client;
 	public VCVSElm(int xa, int ya, int xb, int yb, int f,
 		      StringTokenizer st) {
 	    super(xa, ya, xb, yb, f, st);
-//	    inputCount = Integer.parseInt(st.nextToken());
-//	    exprString = CustomLogicModel.unescape(st.nextToken());
-//	    parseExpr();
-//	    setupPins();
 	}
 	public VCVSElm(int xx, int yy) {
 	    super(xx, yy);
-	    exprString = "2*(a-b)";
-//	    inputCount = 2;
-//	    exprString = "a+b";
-//	    parseExpr();
-//	    setupPins();
 	}
 	
 	void setupPins() {
@@ -103,6 +94,9 @@ package com.lushprojects.circuitjs1.client;
 
             for (i = 0; i != inputCount; i++)
         	lastVolts[i] = volts[i];
+        }
+        void stepFinished() {
+            exprState.updateLastValues(volts[inputCount]-volts[inputCount+1]);
         }
 	int getPostCount() { return inputCount+2; }
 	int getVoltageSourceCount() { return 1; }

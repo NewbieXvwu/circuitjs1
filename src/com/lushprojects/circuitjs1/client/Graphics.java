@@ -25,13 +25,14 @@ public class Graphics {
 	
 	Context2d context;
 	int currentFontSize;
-	Font currentFont= null;
 	Color lastColor;
+	int savedFontSize;
 	static boolean isFullScreen=false;
 	
 	  public Graphics(Context2d context) {
 		    this.context = context;
-		  }
+		    currentFontSize = 12;
+	  }
 	  
 	  public void setColor(Color color) {
 		    if (color != null) {
@@ -57,8 +58,14 @@ public class Graphics {
 	  }
 	  
 	  public void restore() {
-		  context.restore();
+	      context.restore();
+	      currentFontSize = savedFontSize;
 	  }
+	  public void save() {
+	      context.save();
+	      savedFontSize = currentFontSize;
+	  }
+	  
 	  
 	  public void fillRect(int x, int y, int width, int height) {
 		//  context.beginPath();
@@ -98,7 +105,15 @@ public class Graphics {
 		  context.stroke();
 	//	  context.closePath();
 	  }
-	  
+
+	  public void drawLine(Point x1, Point x2) {
+		  context.beginPath();
+		  context.moveTo(x1.x, x1.y);
+		  context.lineTo(x2.x, x2.y);
+		  context.stroke();
+	//	  context.closePath();
+	  }
+
 	  public void drawPolyline(int[] xpoints, int[] ypoints, int n) {
 		  int i;
 		  context.beginPath();
@@ -130,13 +145,13 @@ public class Graphics {
 		  if (f!=null){
 			  context.setFont(f.fontname);
 			  currentFontSize=f.size;
-			  currentFont=f;
 		  }
 	  }
-	  
-	  Font getFont(){
-		  return currentFont;
-	  }
+
+//	  Font getFont(){
+//	          // this may return wrong font if g.save/restore() is used.  just use that instead
+//		  return currentFont;
+//	  }
 	  
 	  public void drawLock(int x, int y) {
 	      context.save();

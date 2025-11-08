@@ -37,6 +37,7 @@ public class LoadFile extends FileUpload implements  ChangeHandler {
 		sim.readCircuit(s);
 		sim.createNewLoadFile();
 		sim.setCircuitTitle(t);
+		ExportAsLocalFileDialog.setLastFileName(t);
 		sim.unsavedChanges = false;
 	}
 	
@@ -65,7 +66,10 @@ public class LoadFile extends FileUpload implements  ChangeHandler {
 		/*-{
 			var oFiles = $doc.getElementById("LoadFileElement").files,
     		nFiles = oFiles.length;
-    		if (nFiles>=1 && oFiles[0].size<128000) {
+    		if (nFiles>=1) {
+    		    if (oFiles[0].size >= 128000)
+    		    	alert("File too large!");
+    		    else {
         		var reader = new FileReader();
     			reader.onload = function(e) {
       				var text = reader.result;
@@ -73,6 +77,7 @@ public class LoadFile extends FileUpload implements  ChangeHandler {
         		};
 
     			reader.readAsText(oFiles[0]);
+    		    }
     		}
 		 }-*/;
 	

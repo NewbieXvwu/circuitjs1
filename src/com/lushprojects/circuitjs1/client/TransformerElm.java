@@ -24,8 +24,10 @@ package com.lushprojects.circuitjs1.client;
 	Point ptEnds[], ptCoil[], ptCore[];
 	double current[], curcount[];
 	Point dots[];
-	int width, polarity;
+	int width, polarity, flip;
 	public static final int FLAG_REVERSE = 4;
+	public static final int FLAG_VERTICAL = 8;
+	public static final int FLAG_FLIP = 16;
 	public TransformerElm(int xx, int yy) {
 	    super(xx, yy);
 	    inductance = 4;
@@ -39,7 +41,11 @@ package com.lushprojects.circuitjs1.client;
 	public TransformerElm(int xa, int ya, int xb, int yb, int f,
 			      StringTokenizer st) {
 	    super(xa, ya, xb, yb, f);
-	    width = max(32, abs(yb-ya));
+	    if (hasFlag(FLAG_VERTICAL))
+		width = -max(32, abs(xb-xa));
+	    else
+		width = max(32, abs(yb-ya));
+	    
 	    inductance = new Double(st.nextToken()).doubleValue();
 	    ratio = new Double(st.nextToken()).doubleValue();
 	    current  = new double[2];
@@ -51,12 +57,19 @@ package com.lushprojects.circuitjs1.client;
 		couplingCoef = new Double(st.nextToken()).doubleValue();
 	    } catch (Exception e) { }
 	    noDiagonal = true;
-	    polarity = ((flags & FLAG_REVERSE) != 0) ? -1 : 1; 
+	    polarity = (hasFlag(FLAG_REVERSE)) ? -1 : 1; 
 	}
 	void drag(int xx, int yy) {
 	    xx = sim.snapGrid(xx);
 	    yy = sim.snapGrid(yy);
-	    width = max(32, abs(yy-y));
+	    if (abs(xx-x) > abs(yy-y)) {
+		flags &= ~FLAG_VERTICAL;
+	    } else
+		flags |= FLAG_VERTICAL;
+	    if (hasFlag(FLAG_VERTICAL))
+		width = -max(32, abs(xx-x));
+	    else
+		width = max(32, abs(yy-y));
 	    if (xx == x)
 	        yy = y;
 	    x2 = xx; y2 = yy;
@@ -76,7 +89,10 @@ package com.lushprojects.circuitjs1.client;
 	    }
 	    for (i = 0; i != 2; i++) {
 		setPowerColor(g, current[i]*(volts[i]-volts[i+2]));
-		drawCoil(g, dsign*(i == 1 ? -6*polarity : 6), ptCoil[i], ptCoil[i+2], volts[i], volts[i+2]);
+		int csign = dsign*(i == 1 ? -6*polarity : 6)*flip;
+		if (hasFlag(FLAG_VERTICAL))
+		    csign *= -1;
+		drawCoil(g, csign, ptCoil[i], ptCoil[i+2], volts[i], volts[i+2]);
 	    }
 	    g.setColor(needsHighlight() ? selectColor : lightGrayColor);
 	    for (i = 0; i != 2; i++) {
@@ -97,14 +113,18 @@ package com.lushprojects.circuitjs1.client;
 	
 	void setPoints() {
 	    super.setPoints();
-	    point2.y = point1.y;
+	    if (hasFlag(FLAG_VERTICAL))
+		point2.x = point1.x;
+	    else
+		point2.y = point1.y;
 	    ptEnds = newPointArray(4);
 	    ptCoil = newPointArray(4);
 	    ptCore = newPointArray(4);
 	    ptEnds[0] = point1;
 	    ptEnds[1] = point2;
-	    interpPoint(point1, point2, ptEnds[2], 0, -dsign*width);
-	    interpPoint(point1, point2, ptEnds[3], 1, -dsign*width);
+	    flip = hasFlag(FLAG_FLIP) ? -1 : 1;
+	    interpPoint(point1, point2, ptEnds[2], 0, -dsign*width*flip);
+	    interpPoint(point1, point2, ptEnds[3], 1, -dsign*width*flip);
 	    double ce = .5-12/dn;
 	    double cd = .5-2/dn;
 	    int i;
@@ -115,10 +135,11 @@ package com.lushprojects.circuitjs1.client;
 		interpPoint(ptEnds[i], ptEnds[i+1], ptCore[i+1], 1-cd);
 	    }
 	    if (polarity == -1) {
+		int vsign = (hasFlag(FLAG_VERTICAL)) ? -1 : 1;
 		dots = new Point[2];
 		double dotp = Math.abs(7./width);
-		dots[0] = interpPoint(ptCoil[0], ptCoil[2], dotp, -7*dsign);
-		dots[1] = interpPoint(ptCoil[3], ptCoil[1], dotp, -7*dsign);
+		dots[0] = interpPoint(ptCoil[0], ptCoil[2], dotp, -7*dsign*vsign*flip);
+		dots[1] = interpPoint(ptCoil[3], ptCoil[1], dotp, -7*dsign*vsign*flip);
 		Point x = ptEnds[1]; ptEnds[1] = ptEnds[3]; ptEnds[3] = x;
 		x = ptCoil[1]; ptCoil[1] = ptCoil[3]; ptCoil[3] = x;
 	    } else
@@ -230,7 +251,7 @@ package com.lushprojects.circuitjs1.client;
 	    if (n == 0)
 		return new EditInfo("Primary Inductance (H)", inductance, .01, 5);
 	    if (n == 1)
-		return new EditInfo("Ratio", ratio, 1, 10).setDimensionless();
+		return new EditInfo("Ratio (N1/N2)", 1/ratio, 1, 10).setDimensionless();
 	    if (n == 2)
 		return new EditInfo("Coupling Coefficient", couplingCoef, 0, 1).
 		    setDimensionless();
@@ -252,7 +273,7 @@ package com.lushprojects.circuitjs1.client;
 	    if (n == 0 && ei.value > 0)
 		inductance = ei.value;
 	    if (n == 1 && ei.value > 0)
-		ratio = ei.value;
+		ratio = 1/ei.value;
 	    if (n == 2 && ei.value > 0 && ei.value < 1)
 		couplingCoef = ei.value;
 	    if (n == 3) {
@@ -271,4 +292,22 @@ package com.lushprojects.circuitjs1.client;
 	    }
 	}
 	int getShortcut() { return 'T'; }
+
+       void flipX(int c2, int count) {
+	   if (hasFlag(FLAG_VERTICAL))
+	       flags ^= FLAG_FLIP;
+           super.flipX(c2, count);
+       }
+       void flipY(int c2, int count) {
+	   if (!hasFlag(FLAG_VERTICAL))
+	       flags ^= FLAG_FLIP;
+           super.flipY(c2, count);
+       }
+
+       void flipXY(int xmy, int count) {
+           flags ^= FLAG_VERTICAL;
+           width *= -1;
+           super.flipXY(xmy, count);
+       }
+
     }

@@ -54,7 +54,7 @@ package com.lushprojects.circuitjs1.client;
 	    lead1 = interpPoint(point1, point2, 1-12/dn);
 	}
 	void draw(Graphics g) {
-		Font oldf=g.getFont();
+	    g.save();
 	    Font f = new Font("SansSerif", Font.BOLD, 20);
 	    g.setFont(f);
 	    g.setColor(needsHighlight() ? selectColor : whiteColor);
@@ -68,7 +68,7 @@ package com.lushprojects.circuitjs1.client;
 	    updateDotCount();
 	    drawDots(g, point1, lead1, -curcount);
 	    drawPosts(g);
-	    g.setFont(oldf);
+	    g.restore();
 	}
 	
 	Rectangle getSwitchRect() {
@@ -76,11 +76,19 @@ package com.lushprojects.circuitjs1.client;
 	}	
 
 	void setCurrent(int vs, double c) { current = c; }
+	void calculateCurrent() {}
 	void stamp() {
+	    sim.stampVoltageSource(0, nodes[0], voltSource);
+	}
+	
+	boolean isWireEquivalent() { return false; }
+	boolean isRemovableWire() { return false; }
+
+	void doStep() {
 	    double v = (position == 0) ? loV : hiV;
 	    if (isTernary())
-		v = position * 2.5;
-	    sim.stampVoltageSource(0, nodes[0], voltSource, v);
+		v = loV + position * (hiV-loV) * .5;
+	    sim.updateVoltageSource(0, nodes[0], voltSource, v);
 	}
 	int getVoltageSourceCount() { return 1; }
 	double getVoltageDiff() { return volts[0]; }
@@ -100,7 +108,7 @@ package com.lushprojects.circuitjs1.client;
 		return ei;
 	    }
 	    if (n == 1)
-		return new EditInfo("High Voltage", hiV, 10, -10);
+		return new EditInfo("High Logic Voltage", hiV, 10, -10);
 	    if (n == 2)
 		return new EditInfo("Low Voltage", loV, 10, -10);
 	    if (n == 3) {

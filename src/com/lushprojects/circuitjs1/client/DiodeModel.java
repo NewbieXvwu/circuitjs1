@@ -6,6 +6,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Vector;
 
+import com.lushprojects.circuitjs1.client.util.Locale;
+
 public class DiodeModel implements Editable, Comparable<DiodeModel> {
 
     static HashMap<String, DiodeModel> modelMap;
@@ -21,6 +23,7 @@ public class DiodeModel implements Editable, Comparable<DiodeModel> {
     boolean readOnly;
     boolean builtIn;
     boolean oldStyle;
+    boolean internal;
     static final int FLAGS_SIMPLE = 1; 
     
     // Electron thermal voltage at SPICE's default temperature of 27 C (300.15 K):
@@ -79,7 +82,7 @@ public class DiodeModel implements Editable, Comparable<DiodeModel> {
 	addDefaultModel("default-zener", new DiodeModel(1.7143528192808883e-7, 0, 2, 5.6, null));
 	
 	// old default LED with saturation current that is way too small (causes numerical errors)
-	addDefaultModel("old-default-led", new DiodeModel(2.2349907006671927e-18, 0, 2, 0, null));
+	addDefaultModel("old-default-led", new DiodeModel(2.2349907006671927e-18, 0, 2, 0, null).setInternal());
 	
 	// default for newly created LEDs, https://www.diyaudio.com/forums/software-tools/25884-spice-models-led.html
 	addDefaultModel("default-led", new DiodeModel(93.2e-12, .042, 3.73, 0, null));
@@ -87,18 +90,33 @@ public class DiodeModel implements Editable, Comparable<DiodeModel> {
 	// https://www.allaboutcircuits.com/textbook/semiconductors/chpt-3/spice-models/
 	addDefaultModel("1N5711", new DiodeModel(315e-9, 2.8, 2.03, 70, "Schottky"));
 	addDefaultModel("1N5712", new DiodeModel(680e-12, 12, 1.003, 20, "Schottky"));
-	addDefaultModel("1N34", new DiodeModel(200e-12, 84e-3, 2.19, 60, "germanium"));
+
+	// model is inaccurate
+	addDefaultModel("1N34", new DiodeModel(200e-12, 84e-3, 2.19, 60, "germanium").setInternal());
+
 	addDefaultModel("1N4004", new DiodeModel(18.8e-9, 28.6e-3, 2, 400, "general purpose"));
 //	addDefaultModel("1N3891", new DiodeModel(63e-9, 9.6e-3, 2, 0));  // doesn't match datasheet very well
 	
 	// http://users.skynet.be/hugocoolens/spice/diodes/1n4148.htm
 	addDefaultModel("1N4148", new DiodeModel(4.352e-9, .6458, 1.906, 75, "switching"));
+	addDefaultModel("x2n2646-emitter", new DiodeModel(2.13e-11, 0, 1.8, 0, null).setInternal());
+	
+	// for TL431
+	loadInternalModel("~tl431ed-d_ed 0 1e-14 5 1 0 0");
+	
+	// for LM317
+	loadInternalModel("~lm317-dz 0 1e-14 0 1 6.3 0");
     }
 
     static void addDefaultModel(String name, DiodeModel dm) {
 	modelMap.put(name, dm);
 	dm.readOnly = dm.builtIn = true;
 	dm.name = name;
+    }
+
+    DiodeModel setInternal() {
+	internal = true;
+	return this;
     }
     
     // create a new model using given parameters, keeping backward compatibility.  The method we use has problems, but we don't want to
@@ -141,6 +159,12 @@ public class DiodeModel implements Editable, Comparable<DiodeModel> {
 	return getModelWithName("default");
     }
     
+    static void loadInternalModel(String s) {
+        StringTokenizer st = new StringTokenizer(s);
+        DiodeModel dm = undumpModel(st);
+        dm.builtIn = dm.internal = true;
+    }
+
     static void clearDumpedFlags() {
 	if (modelMap == null)
 	    return;
@@ -157,9 +181,12 @@ public class DiodeModel implements Editable, Comparable<DiodeModel> {
 	while (it.hasNext()) {
 	    Map.Entry<String,DiodeModel> pair = (Map.Entry)it.next();
 	    DiodeModel dm = pair.getValue();
+	    if (dm.internal)
+		continue;
 	    if (zener && dm.breakdownVoltage == 0)
 		continue;
-	    vector.add(dm);
+	    if (!vector.contains(dm))
+		vector.add(dm);
 	}
 	Collections.sort(vector);
 	return vector;
@@ -172,7 +199,7 @@ public class DiodeModel implements Editable, Comparable<DiodeModel> {
     String getDescription() {
 	if (description == null)
 	    return name;
-	return name + " (" + CirSim.LS(description) + ")";
+	return name + " (" + Locale.LS(description) + ")";
     }
     
     DiodeModel() {
@@ -193,10 +220,11 @@ public class DiodeModel implements Editable, Comparable<DiodeModel> {
 	updateModel();
     }
 
-    static void undumpModel(StringTokenizer st) {
+    static DiodeModel undumpModel(StringTokenizer st) {
 	String name = CustomLogicModel.unescape(st.nextToken());
 	DiodeModel dm = DiodeModel.getModelWithName(name);
 	dm.undump(st);
+	return dm;
     }
     
     void undump(StringTokenizer st) {
@@ -265,6 +293,8 @@ public class DiodeModel implements Editable, Comparable<DiodeModel> {
     void setEmissionCoefficient() {
 	if (forwardCurrent > 0 && forwardVoltage > 0)
 	    emissionCoefficient = (forwardVoltage/Math.log(forwardCurrent/saturationCurrent+1)) / vt;
+
+	seriesResistance = 0;
     }
     
     public void setForwardVoltage() {

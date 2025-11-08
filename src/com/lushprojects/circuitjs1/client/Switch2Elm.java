@@ -92,7 +92,7 @@ package com.lushprojects.circuitjs1.client;
 	    
 	    updateDotCount();
 	    drawDots(g, point1, lead1, curcount);
-	    if (position != 2)
+	    if (!(position == 2 && hasCenterOff()))
 		drawDots(g, swpoles[position], swposts[position], curcount);
 	    drawPosts(g);
 	}
@@ -117,14 +117,17 @@ package com.lushprojects.circuitjs1.client;
 	    if (position == 2 && hasCenterOff())
 		current = 0;
 	}
+	
 	void stamp() {
 	    if (position == 2 && hasCenterOff()) // in center?
 		return;
 	    sim.stampVoltageSource(nodes[0], nodes[position+1], voltSource, 0);
 	}
+		
 	int getVoltageSourceCount() {
-	    return (position == 2 && hasCenterOff()) ? 0 : 1;
+	    return (position == 2 && hasCenterOff()) ? 0 : 1; 	    
 	}
+	
 	void toggle() {
 	    super.toggle();
 	    if (link != 0) {
@@ -133,7 +136,7 @@ package com.lushprojects.circuitjs1.client;
 		    Object o = sim.elmList.elementAt(i);
 		    if (o instanceof Switch2Elm) {
 			Switch2Elm s2 = (Switch2Elm) o;
-			if (s2.link == link)
+			if (s2.link == link && position < s2.posCount)
 			    s2.position = position;
 		    }
 		}
@@ -144,7 +147,12 @@ package com.lushprojects.circuitjs1.client;
 		return false;
 	    return comparePair(n1, n2, 0, 1+position);
 	}
-	boolean isWire() { return true; }
+	
+	boolean isWireEquivalent() { return true; }
+	
+	// optimizing out this element is too complicated to be worth it (see #646)
+	boolean isRemovableWire() { return false; }
+	
 	void getInfo(String arr[]) {
 	    arr[0] = "switch (" + (link == 0 ? "S" : "D") + "P" +
 		    ((throwCount > 2) ? throwCount+"T)" : "DT)");
@@ -157,9 +165,9 @@ package com.lushprojects.circuitjs1.client;
 	    	return ei;
 	    }*/
 	    if (n == 1)
-	    	return new EditInfo("Switch Group", link, 0, 100).setDimensionless();
+	    	return new EditInfo("Switch Group", link, 0, 100).setDimensionless().disallowSliders();
 	    if (n == 2)
-	    	return new EditInfo("# of Throws", throwCount, 2, 10).setDimensionless();
+	    	return new EditInfo("# of Throws", throwCount, 2, 10).setDimensionless().disallowSliders();
 	    return super.getEditInfo(n);
 	}
 	public void setEditValue(int n, EditInfo ei) {
@@ -188,4 +196,20 @@ package com.lushprojects.circuitjs1.client;
 	boolean hasCenterOff() { return (flags & FLAG_CENTER_OFF) != 0 && throwCount == 2; }
 	
 	int getShortcut() { return 'S'; }
+
+	void flipX(int c2, int count) {
+	    super.flipX(c2, count);
+	    position = posCount-1-position;
+	}   
+		 
+	void flipY(int c2, int count) { 
+	    super.flipY(c2, count);
+	    position = posCount-1-position;
+	}
+
+	void flipXY(int c2, int count) {
+	    super.flipXY(c2, count);
+	    position = posCount-1-position;
+	}       
+
     }

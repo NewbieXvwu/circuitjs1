@@ -21,6 +21,7 @@ package com.lushprojects.circuitjs1.client;
 
 import com.google.gwt.storage.client.Storage;
 import com.google.gwt.user.client.Window;
+import com.lushprojects.circuitjs1.client.util.Locale;
 
 class EditOptions implements Editable {
 	CirSim sim;
@@ -37,6 +38,7 @@ class EditOptions implements Editable {
 	            EditInfo ei =  new EditInfo("Change Language", 0, -1, -1);
 	            ei.choice = new Choice();
 	            ei.choice.add("(no change)");
+	            ei.choice.add("Čeština");
 	            ei.choice.add("Dansk");
 	            ei.choice.add("Deutsch");
 	            ei.choice.add("English");
@@ -47,6 +49,9 @@ class EditOptions implements Editable {
 	            ei.choice.add("Polski");
 	            ei.choice.add("Português");
 	            ei.choice.add("\u0420\u0443\u0441\u0441\u043a\u0438\u0439"); // Russian 
+	            ei.choice.add("\u4e2d\u6587 (\u4e2d\u56fd\u5927\u9646)"); // Chinese 
+	            ei.choice.add("\u4e2d\u6587 (\u53f0\u6e7e)"); // Chinese (tw) 
+	            ei.choice.add("日本語"); // Japanese
 	            return ei;
 		}
 		
@@ -54,12 +59,31 @@ class EditOptions implements Editable {
 		    return new EditInfo("Positive Color", CircuitElm.positiveColor.getHexValue());
 		if (n == 4)
 		    return new EditInfo("Negative Color", CircuitElm.negativeColor.getHexValue());
-		if (n == 5) {
+		if (n == 5)
+		    return new EditInfo("Neutral Color", CircuitElm.neutralColor.getHexValue());
+		if (n == 6)
+		    return new EditInfo("Selection Color", CircuitElm.selectColor.getHexValue());
+		if (n == 7)
+		    return new EditInfo("Current Color", CircuitElm.currentColor.getHexValue());
+		if (n == 8)
+		    return new EditInfo("# of Decimal Digits (short format)", CircuitElm.shortDecimalDigits);
+		if (n == 9)
+		    return new EditInfo("# of Decimal Digits (long format)", CircuitElm.decimalDigits);
+		if (n == 10) {
+		    EditInfo ei = new EditInfo("", 0, -1, -1);
+		    ei.checkbox = new Checkbox("Developer Mode", sim.developerMode);
+		    return ei;
+		}
+		if (n == 11)
+		    return new EditInfo("Minimum Target Frame Rate", sim.minFrameRate);
+		if (n == 12)
+		    return new EditInfo("Mouse Wheel Sensitivity", sim.wheelSensitivity);
+		if (n == 13) {
 		    EditInfo ei = new EditInfo("", 0, -1, -1);
 		    ei.checkbox = new Checkbox("Auto-Adjust Timestep", sim.adjustTimeStep);
 		    return ei;
 		}
-		if (n == 6 && sim.adjustTimeStep)
+		if (n == 14 && sim.adjustTimeStep)
 		    return new EditInfo("Minimum time step size (s)", sim.minTimeStep, 0, 0);
 
 		return null;
@@ -80,49 +104,78 @@ class EditOptions implements Editable {
 		    	    return;
 		    	String langString = null;
 		    	switch (lang) {
-		    	case 1: langString = "da"; break;
-		    	case 2: langString = "de"; break;
-		    	case 3: langString = "en"; break;
-		    	case 4: langString = "es"; break;
-		    	case 5: langString = "fr"; break;
-		    	case 6: langString = "it"; break;
-		    	case 7: langString = "nb"; break;
-		    	case 8: langString = "pl"; break;
-			case 9: langString = "pt"; break;
-		    	case 10: langString = "ru"; break;
+		    	// Czech is csx instead of cs because we are not ready to use it automatically yet
+		    	case 1: langString = "csx"; break;
+		    	case 2: langString = "da"; break;
+		    	case 3: langString = "de"; break;
+		    	case 4: langString = "en"; break;
+		    	case 5: langString = "es"; break;
+		    	case 6: langString = "fr"; break;
+		    	case 7: langString = "it"; break;
+		    	case 8: langString = "nb"; break;
+		    	case 9: langString = "pl"; break;
+			case 10: langString = "pt"; break;
+		    	case 11: langString = "ru"; break;
+		    	case 12: langString = "zh"; break;
+		    	case 13: langString = "zh-tw"; break;
+		    	case 14: langString = "ja"; break;
 		    	}
 		    	if (langString == null)
 		    	    return;
 		        Storage stor = Storage.getLocalStorageIfSupported();
 		        if (stor == null) {
-		            Window.alert(sim.LS("Can't set language"));
+		            Window.alert(Locale.LS("Can't set language"));
 		            return;
 		        }
 		        stor.setItem("language", langString);
-		        if (Window.confirm(sim.LS("Must restart to set language.  Restart now?")))
+		        if (Window.confirm(Locale.LS("Must restart to set language.  Restart now?")))
 		            Window.Location.reload();
 		}
 		if (n == 3) {
-		    String txt = ei.textf.getText();
-		    Storage stor = Storage.getLocalStorageIfSupported();
-		    if (stor != null)
-			stor.setItem("positiveColor", txt);
-		    CircuitElm.positiveColor = new Color(txt);
+		    CircuitElm.positiveColor = setColor("positiveColor", ei, Color.green);
 		    CircuitElm.setColorScale();
 		}
 		if (n == 4) {
-		    String txt = ei.textf.getText();
-		    Storage stor = Storage.getLocalStorageIfSupported();
-		    if (stor != null)
-			stor.setItem("negativeColor", txt);
-		    CircuitElm.negativeColor = new Color(txt);
+		    CircuitElm.negativeColor = setColor("negativeColor", ei, Color.red);
 		    CircuitElm.setColorScale();
 		}
 		if (n == 5) {
+		    CircuitElm.neutralColor = setColor("neutralColor", ei, Color.gray);
+		    CircuitElm.setColorScale();
+		}
+		if (n == 6)
+		    CircuitElm.selectColor = setColor("selectColor", ei, Color.cyan);
+		if (n == 7)
+		    CircuitElm.currentColor = setColor("currentColor", ei, Color.yellow);
+		if (n == 8)
+		    CircuitElm.setDecimalDigits((int)ei.value, true, true);
+		if (n == 9)
+		    CircuitElm.setDecimalDigits((int)ei.value, false, true);
+		if (n == 10)
+	            sim.developerMode = ei.checkbox.getState();
+		if (n == 11 && ei.value > 0)
+		    sim.minFrameRate = ei.value;
+		if (n == 12 && ei.value > 0) {
+		    sim.wheelSensitivity = ei.value;
+		    Storage stor = Storage.getLocalStorageIfSupported();
+		    if (stor != null)
+			stor.setItem("wheelSensitivity", Double.toString(sim.wheelSensitivity));
+		}
+		if (n == 13) {
 		    sim.adjustTimeStep = ei.checkbox.getState();
 		    ei.newDialog = true;
 		}
-		if (n == 6 && ei.value > 0)
-			sim.minTimeStep = ei.value;
+		if (n == 14 && ei.value > 0)
+		    sim.minTimeStep = ei.value;
+	}
+	
+	Color setColor(String name, EditInfo ei, Color def) {
+	    String val = ei.textf.getText();
+	    if (val.length() == 0)
+		val = def.getHexValue();
+	    Storage stor = Storage.getLocalStorageIfSupported();
+	    if (stor != null)
+		stor.setItem(name, val);
+	    return new Color(val);
 	}
 };

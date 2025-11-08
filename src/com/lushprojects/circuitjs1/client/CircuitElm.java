@@ -22,13 +22,19 @@ package com.lushprojects.circuitjs1.client;
 import java.util.Vector;
 
 import com.google.gwt.canvas.dom.client.CanvasGradient;
+import com.google.gwt.canvas.dom.client.Context2d;
 import com.google.gwt.canvas.dom.client.Context2d.LineCap;
+import com.google.gwt.core.client.JavaScriptObject;
+import com.google.gwt.core.client.JsArrayString;
 import com.google.gwt.i18n.client.NumberFormat;
+import com.google.gwt.storage.client.Storage;
+import com.google.gwt.user.client.Random;
+import com.lushprojects.circuitjs1.client.util.Locale;
 
 // circuit element class
 public abstract class CircuitElm implements Editable {
     static double voltageRange = 5;
-    static int colorScaleCount = 32;
+    static int colorScaleCount = 201; // odd so ground = gray 
     static Color colorScale[];
     static double currentMult, powerMult;
     
@@ -36,10 +42,11 @@ public abstract class CircuitElm implements Editable {
     static Point ps1, ps2;
     
     static CirSim sim;
-    static Color whiteColor, selectColor, lightGrayColor;
+    static public Color whiteColor, lightGrayColor, selectColor;
+    static public Color positiveColor, negativeColor, neutralColor, currentColor;
     static Font unitsFont;
 
-    static NumberFormat showFormat, shortFormat;//, noCommaFormat;
+    static NumberFormat showFormat, shortFormat, fixedFormat;
     static final double pi = 3.14159265358979323846;
     static CircuitElm mouseElmRef = null;
 
@@ -47,6 +54,8 @@ public abstract class CircuitElm implements Editable {
     static final int SCALE_1 = 1;
     static final int SCALE_M = 2;
     static final int SCALE_MU = 3;
+    
+    static int decimalDigits, shortDecimalDigits;
  
     // initial point where user created element.  For simple two-terminal elements, this is the first node/post.
     int x, y;
@@ -83,12 +92,14 @@ public abstract class CircuitElm implements Editable {
     
     public boolean selected;
     
+    boolean hasWireInfo; // used in calcWireInfo()
+    
 //    abstract int getDumpType();
     int getDumpType() {
 	
 	throw new IllegalStateException(); // Seems necessary to work-around what appears to be a compiler
 	// bug affecting OTAElm to make sure this method (which should really be abstract) throws
-	// an exception
+	// an exception.  If you're getting this, try making small update to CompositeElm.java and try again
  }
     
     // leftover from java, doesn't do anything anymore. 
@@ -96,6 +107,8 @@ public abstract class CircuitElm implements Editable {
     
     int getDefaultFlags() { return 0; }
 
+    boolean hasFlag(int f) { return (flags & f) != 0; }
+    
     static void initClass(CirSim s) {
 	unitsFont = new Font("SansSerif", 0, 12);
 	sim = s;
@@ -105,13 +118,52 @@ public abstract class CircuitElm implements Editable {
 	
 	ps1 = new Point();
 	ps2 = new Point();
-
-	showFormat=NumberFormat.getFormat("####.###");
-
-	shortFormat=NumberFormat.getFormat("####.#");
+	
+	Storage stor = Storage.getLocalStorageIfSupported();
+	decimalDigits = 3;
+	shortDecimalDigits = 1;
+	if (stor != null) {
+	    String s1 = stor.getItem("decimalDigits");
+	    String s2 = stor.getItem("decimalDigitsShort");
+	    if (s1 != null)
+		decimalDigits = Integer.parseInt(s1);
+	    if (s2 != null)
+		shortDecimalDigits = Integer.parseInt(s2);
+	}
+	setDecimalDigits(decimalDigits, false, false);
+	setDecimalDigits(shortDecimalDigits, true, false);
     }
 
-    static public Color positiveColor, negativeColor, neutralColor;
+    static void setDecimalDigits(int num, boolean sf, boolean save) {
+	if (sf)
+	    shortDecimalDigits = num;
+	else
+	    decimalDigits = num;
+	
+	String s = "####.";
+	int ct = num;
+	for (; ct > 0; ct--)
+	    s += '#';
+	NumberFormat nf = NumberFormat.getFormat(s);
+	if (sf)
+	    shortFormat = nf;
+	else
+	    showFormat = nf;
+	
+	if (save) {
+	    Storage stor = Storage.getLocalStorageIfSupported();
+	    if (stor != null)
+		stor.setItem(sf ? "decimalDigitsShort" : "decimalDigits", Integer.toString(num));
+	}
+	
+	if (!sf) {
+	    s = "####.";
+	    ct = num;
+	    for (; ct > 0; ct--)
+		s += '0';
+	    fixedFormat = NumberFormat.getFormat(s);
+	}
+    }
     
     static void setColorScale() {
 
@@ -240,6 +292,21 @@ public abstract class CircuitElm implements Editable {
 	lead2 = interpPoint(point1, point2, (dn+len)/(2*dn));
     }
 
+    // adjust leads so that the point exactly between them is a grid point (so we can place a terminal there)
+    void adjustLeadsToGrid(boolean flipX, boolean flipY) {
+        int cx = (point1.x+point2.x)/2;
+        int cy = (point1.y+point2.y)/2;
+
+	// when flipping, it changes the rounding direction.  need to adjust for this
+	int roundx = (flipX) ? 1 : -1;
+	int roundy = (flipY) ? 1 : -1;
+
+        int adjx = sim.snapGrid(cx+roundx)-cx;
+        int adjy = sim.snapGrid(cy+roundy)-cy;
+        lead1.move(adjx, adjy);
+        lead2.move(adjx, adjy);
+    }
+
     // calculate point fraction f between a and b, linearly interpolated
     Point interpPoint(Point a, Point b, double f) {
 	Point p = new Point();
@@ -321,6 +388,8 @@ public abstract class CircuitElm implements Editable {
 	return a;
     }
 
+    final int CURRENT_TOO_FAST = 100;
+
     // draw current dots from point a to b
     void drawDots(Graphics g, Point pa, Point pb, double pos) {
 	 if ((!sim.simIsRunning()) || pos == 0 || !sim.dotsCheckItem.getState())
@@ -328,8 +397,22 @@ public abstract class CircuitElm implements Editable {
 	int dx = pb.x-pa.x;
 	int dy = pb.y-pa.y;
 	double dn = Math.sqrt(dx*dx+dy*dy);
-	g.setColor(sim.conventionCheckItem.getState()?Color.yellow:Color.cyan);
+	g.setColor(currentColor);
 	int ds = 16;
+	if (pos == CURRENT_TOO_FAST || pos == -CURRENT_TOO_FAST) {
+	    // current is moving too fast, avoid aliasing by drawing dots at
+	    // random position with transparent yellow line underneath
+	    g.save();
+	    Context2d ctx = g.context;
+	    ctx.setLineWidth(4);
+	    ctx.setGlobalAlpha(.5);
+	    ctx.beginPath();
+	    ctx.moveTo(pa.x, pa.y);
+	    ctx.lineTo(pb.x, pb.y);
+	    ctx.stroke();
+	    g.restore();
+	    pos = Random.nextDouble()*ds;
+	}
 	pos %= ds;
 	if (pos < 0)
 	    pos += ds;
@@ -341,6 +424,12 @@ public abstract class CircuitElm implements Editable {
 	}
     }
 
+    double addCurCount(double c, double a) {
+	if (c == CURRENT_TOO_FAST || c == -CURRENT_TOO_FAST)
+	    return c;
+	return c+a;
+    }
+    
     Polygon calcArrow(Point a, Point b, double al, double aw) {
 	Polygon poly = new Polygon();
 	Point p1 = new Point();
@@ -436,6 +525,12 @@ public abstract class CircuitElm implements Editable {
     	int oldy=y;
     	int oldx2=x2;
     	int oldy2=y2;
+    	if (noDiagonal) {
+    	    if (x == x2)
+    		dx = 0;
+    	    else
+    		dy = 0;
+    	}
     	if (n == 0) {
     		x += dx; y += dy;
     	} else {
@@ -450,6 +545,30 @@ public abstract class CircuitElm implements Editable {
     	setPoints();
     }
     
+    void flipX(int center2, int count) {
+	x =  center2-x;
+	x2 = center2-x2;
+	initBoundingBox();
+	setPoints();
+    }
+
+    void flipY(int center2, int count) {
+	y =  center2-y;
+	y2 = center2-y2;
+	initBoundingBox();
+	setPoints();
+    }
+
+    void flipXY(int xmy, int count) {
+	int nx = y+xmy;
+	int ny = x-xmy;
+	int nx2 = y2+xmy;
+	int ny2 = x2-xmy;
+	x = nx; y = ny; x2 = nx2; y2 = ny2;
+	initBoundingBox();
+	setPoints();
+    }
+
     void drawPosts(Graphics g) {
 	// we normally do this in updateCircuit() now because the logic is more complicated.
 	// we only handle the case where we have to draw all the posts.  That happens when
@@ -466,13 +585,17 @@ public abstract class CircuitElm implements Editable {
 	}
     }
     
+    int getNumHandles() {
+	return getPostCount();
+    }
+    
     void drawHandles(Graphics g, Color c) {
     	g.setColor(c);
     	if (lastHandleGrabbed==-1)
     		g.fillRect(x-3, y-3, 7, 7);
     	else if (lastHandleGrabbed==0)
     		g.fillRect(x-4, y-4, 9, 9);
-    	if (getPostCount() > 1 || this instanceof ScopeElm) {
+    	if (getNumHandles() > 1) {
     		if (lastHandleGrabbed==-1)
     			g.fillRect(x2-3, y2-3, 7, 7);
     		else if (lastHandleGrabbed==1)
@@ -485,7 +608,7 @@ public abstract class CircuitElm implements Editable {
     	if ( Graphics.distanceSq(x , y , x2, y2)>=minSize) {
     		if (Graphics.distanceSq(x, y, xtest,ytest) <= deltaSq)
     			lastHandleGrabbed=0;
-    		else if (Graphics.distanceSq(x2, y2, xtest,ytest) <= deltaSq)
+    		else if (getNumHandles() > 1 && Graphics.distanceSq(x2, y2, xtest,ytest) <= deltaSq)
     			lastHandleGrabbed=1;
     	}
     	return lastHandleGrabbed;
@@ -522,9 +645,12 @@ public abstract class CircuitElm implements Editable {
 	return (n == 0) ? point1 : (n == 1) ? point2 : null;
     }
     
+    // return post we're connected to (for wires, so we can optimize them out in calculateWireClosure())
+    Point getConnectedPost() {
+	return point2;
+    }
+    
     int getNodeAtPoint(int xp, int yp) {
-	if (getPostCount() == 2)
-	    return (x == xp && y == yp) ? 0 : 1;
 	int i;
 	for (i = 0; i != getPostCount(); i++) {
 	    Point p = getPost(i);
@@ -593,7 +719,7 @@ public abstract class CircuitElm implements Editable {
 //		   x+w, y+fm.getAscent()/2+fm.getDescent());
     	int w=(int)g.context.measureText(s).getWidth();
     	int h2=(int)g.currentFontSize/2;
-		g.context.save();
+		g.save();
 		g.context.setTextBaseline("middle");
 		if (cx) {
 			g.context.setTextAlign("center");
@@ -605,7 +731,7 @@ public abstract class CircuitElm implements Editable {
 		if (cx)
 			g.context.setTextAlign("center");
 		g.drawString(s, x, y);
-		g.context.restore();
+		g.restore();
     }
     
     // draw component values (number of resistor ohms, etc).  hs = offset
@@ -636,11 +762,41 @@ public abstract class CircuitElm implements Editable {
 	    g.drawString(s, xx, yc+dpy+ya);
 	}
     }
+    
+    void drawLabeledNode(Graphics g, String str, Point pt1, Point pt2) {
+	boolean lineOver = false;
+	if (str.startsWith("/")) {
+	    lineOver = true;
+	    str = str.substring(1);
+	}
+        int w=(int)g.context.measureText(str).getWidth();
+        int h=(int)g.currentFontSize;
+        g.save();
+        g.context.setTextBaseline("middle");
+        int x = pt2.x, y = pt2.y;
+        if (pt1.y != pt2.y) {
+            x -= w/2;
+            y += sign(pt2.y-pt1.y)*h;
+        } else {
+            if (pt2.x > pt1.x)
+        	x += 4;
+            else
+        	x -= 4+w;
+        }
+        g.drawString(str, x, y);
+        adjustBbox(x, y-h/2, x+w, y+h/2);
+        g.restore();
+	if (lineOver) {
+	    int ya = y-h/2-1;
+	    g.drawLine(x, ya, x+w, ya);
+	}	
+    }    
+    
     void drawCoil(Graphics g, int hs, Point p1, Point p2,
 		  double v1, double v2) {
 	double len = distance(p1, p2);
 
-	g.context.save();
+	g.save();
 	g.context.setLineWidth(3.0);
 	g.context.transform(((double)(p2.x-p1.x))/len, ((double)(p2.y-p1.y))/len,
 		-((double)(p2.y-p1.y))/len,((double)(p2.x-p1.x))/len,p1.x,p1.y);
@@ -665,7 +821,7 @@ public abstract class CircuitElm implements Editable {
 	    g.context.stroke();
 	}
 
-	g.context.restore();
+	g.restore();
     }
     
     static void drawThickLine(Graphics g, int x, int y, int x2, int y2) {
@@ -773,7 +929,7 @@ public abstract class CircuitElm implements Editable {
 	if (va < 1e-6)
 	    return format(v*1e9, sf) + sp + "n" + u;
 	if (va < 1e-3)
-	    return format(v*1e6, sf) + sp + CirSim.muString + u;
+	    return format(v*1e6, sf) + sp + Locale.muString + u;
 	if (va < 1)
 	    return format(v*1e3, sf) + sp + "m" + u;
 	if (va < 1e3)
@@ -782,7 +938,9 @@ public abstract class CircuitElm implements Editable {
 	    return format(v*1e-3, sf) + sp + "k" + u;
 	if (va < 1e9)
 	    return format(v*1e-6, sf) + sp + "M" + u;
-	return format(v*1e-9, sf) + sp + "G" + u;
+	if (va < 1e12)
+	    return format(v*1e-9, sf) + sp + "G" + u;
+	return NumberFormat.getFormat("#.##E000").format(v) + sp + u;
     }
     
     static String getCurrentText(double i) {
@@ -792,13 +950,18 @@ public abstract class CircuitElm implements Editable {
 	return getUnitText(Math.abs(i), "A");
     }
 
-    static String getUnitTextWithScale(double val, String utext, int scale) {
+    static String getUnitTextWithScale(double val, String utext, int scale) { return getUnitTextWithScale(val, utext, scale, false); }
+
+    static String getUnitTextWithScale(double val, String utext, int scale, boolean fixed) {
+	if (Math.abs(val) > 1e12)
+	    return getUnitText(val, utext);
+	NumberFormat nf = fixed ? fixedFormat : showFormat;
 	if (scale == SCALE_1)
-	    return showFormat.format(val) + " " + utext;
+	    return nf.format(val) + " " + utext;
 	if (scale == SCALE_M)
-	    return showFormat.format(1e3*val) + " m" + utext;
+	    return nf.format(1e3*val) + " m" + utext;
 	if (scale == SCALE_MU)
-	    return showFormat.format(1e6*val) + " " + CirSim.muString + utext;
+	    return nf.format(1e6*val) + " " + Locale.muString + utext;
 	return getUnitText(val, utext);
     }
 
@@ -813,13 +976,11 @@ public abstract class CircuitElm implements Editable {
 	 if (!sim.simIsRunning())
 	    return cc;
 	double cadd = cur*currentMult;
-	/*if (cur != 0 && cadd <= .05 && cadd >= -.05)
-	  cadd = (cadd < 0) ? -.05 : .05;*/
+	if (cadd > 6 || cadd < -6)
+	    return CURRENT_TOO_FAST;
+	if (cc == CURRENT_TOO_FAST)
+	    cc = 0;
 	cadd %= 8;
-	/*if (cadd > 8)
-	  cadd = 8;
-	  if (cadd < -8)
-	  cadd = -8;*/
 	return cc + cadd;
     }
     
@@ -931,10 +1092,18 @@ public abstract class CircuitElm implements Editable {
     // is n1 connected to ground somehow?
     boolean hasGroundConnection(int n1) { return false; }
     
-    // is this a wire or equivalent to a wire?
-    boolean isWire() { return false; }
+    // is this a wire or equivalent to a wire?  (used for circuit validation)
+    boolean isWireEquivalent() { return false; }
     
+    // is this a wire we can remove?
+    boolean isRemovableWire() { return false; }
+    
+    boolean isIdealCapacitor() { return false; }
+
     boolean canViewInScope() { return getPostCount() <= 2; }
+    boolean canFlipX() { return true; }
+    boolean canFlipY() { return true; }
+    boolean canFlipXY() { return canFlipX() || canFlipY(); }
     boolean comparePair(int x1, int x2, int y1, int y2) {
 	return ((x1 == y1 && x2 == y2) || (x1 == y2 && x2 == y1));
     }
@@ -946,8 +1115,11 @@ public abstract class CircuitElm implements Editable {
     boolean isSelected() { return selected; }
     boolean canShowValueInScope(int v) { return false; }
     void setSelected(boolean x) { selected = x; }
-    void selectRect(Rectangle r) {
-	selected = r.intersects(boundingBox);
+    void selectRect(Rectangle r, boolean add) {
+	if (r.intersects(boundingBox))
+	    selected = true;
+	else if (!add)
+	    selected = false;
     }
     static int abs(int x) { return x < 0 ? -x : x; }
     static int sign(int x) { return (x < 0) ? -1 : (x == 0) ? 0 : 1; }
@@ -972,6 +1144,18 @@ public abstract class CircuitElm implements Editable {
     }
     void draggingDone() {}
     
+    int lineDistanceSq(int xa, int ya, int xb, int yb, int gx, int gy) {
+	int dtop = (yb-ya)*gx - (xb-xa)*gy + xb*ya - yb*xa;
+	int dbot = (yb-ya)*(yb-ya) + (xb-xa)*(xb-xa);
+	return dtop*dtop/dbot;
+    }
+
+    int getMouseDistance(int gx, int gy) {
+	if (getPostCount() == 0)
+	    return Graphics.distanceSq(gx, gy, (x2+x)/2, (y2+y)/2);
+	return lineDistanceSq(x, y, x2, y2, gx, gy);
+    }
+
     String dumpModel() { return null; }
     
     boolean isMouseElm() {
@@ -981,6 +1165,7 @@ public abstract class CircuitElm implements Editable {
     void updateModels() {}
     void stepFinished() {}
     
+    // get current flowing into node n out of this element
     double getCurrentIntoNode(int n) {
 	// if we take out the getPostCount() == 2 it gives the wrong value for rails
 	if (n==0 && getPostCount() == 2)
@@ -998,4 +1183,38 @@ public abstract class CircuitElm implements Editable {
 	y2 = oldy;
 	setPoints();
     }
+    
+    String getClassName() { return getClass().getName().replace("com.lushprojects.circuitjs1.client.", ""); }
+    
+    native JsArrayString getJsArrayString() /*-{ return []; }-*/;
+    
+    JsArrayString getInfoJS() {
+	JsArrayString jsarr = getJsArrayString();
+	String arr[] = new String[20];
+	getInfo(arr);
+	int i;
+	for (i = 0; arr[i] != null; i++)
+	    jsarr.push(arr[i]);
+	return jsarr;
+    }
+    
+    double getVoltageJS(int n) {
+	if (n >= volts.length)
+	    return 0;
+	return volts[n];
+    }
+    
+    native void addJSMethods() /*-{
+        var that = this;
+        this.getType = $entry(function() { return that.@com.lushprojects.circuitjs1.client.CircuitElm::getClassName()(); });
+        this.getInfo = $entry(function() { return that.@com.lushprojects.circuitjs1.client.CircuitElm::getInfoJS()(); });
+        this.getVoltageDiff = $entry(function() { return that.@com.lushprojects.circuitjs1.client.CircuitElm::getVoltageDiff()(); });
+        this.getVoltage = $entry(function(n) { return that.@com.lushprojects.circuitjs1.client.CircuitElm::getVoltageJS(I)(n); });
+        this.getCurrent = $entry(function() { return that.@com.lushprojects.circuitjs1.client.CircuitElm::getCurrent()(); });
+        this.getLabelName = $entry(function() { return that.@com.lushprojects.circuitjs1.client.LabeledNodeElm::getName()(); });
+        this.getPostCount = $entry(function() { return that.@com.lushprojects.circuitjs1.client.CircuitElm::getPostCount()(); });
+    }-*/;
+    
+    native JavaScriptObject getJavaScriptObject() /*-{ return this; }-*/;
+    
 }

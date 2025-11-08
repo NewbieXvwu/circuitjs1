@@ -1,10 +1,15 @@
 package com.lushprojects.circuitjs1.client;
 
+import java.util.Date;
+
 import com.google.gwt.core.client.JsArrayInteger;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
+import com.lushprojects.circuitjs1.client.util.Locale;
 
 public class AudioOutputElm extends CircuitElm {
     int dataCount, dataPtr;
@@ -75,6 +80,7 @@ public class AudioOutputElm extends CircuitElm {
 	    lead1 = new Point();
 	}
 	void draw(Graphics g) {
+	    g.save();
 	    boolean selected = (needsHighlight());
 	    Font f = new Font("SansSerif", selected ? Font.BOLD : 0, 14);
 	    String s = "Audio Out";
@@ -94,6 +100,7 @@ public class AudioOutputElm extends CircuitElm {
 		g.setColor(selectColor);
 	    drawThickLine(g, point1, lead1);
 	    drawPosts(g);
+	    g.restore();
 	}
 	double getVoltageDiff() { return volts[0]; }
 	void getInfo(String arr[]) {
@@ -135,7 +142,7 @@ public class AudioOutputElm extends CircuitElm {
 	    nextDataSample = sim.t+sampleStep;
 	}
 	
-	int samplingRateChoices[] = { 8000, 11025, 16000, 22050, 44100 };
+	int samplingRateChoices[] = { 8000, 11025, 16000, 22050, 44100, 48000 };
 	
 	public EditInfo getEditInfo(int n) {
 	    if (n == 0) {
@@ -153,6 +160,20 @@ public class AudioOutputElm extends CircuitElm {
 		}
 		return ei;
 	    }
+            if (n == 2) {
+                EditInfo ei = new EditInfo("", 0, -1, -1);
+                String url=getLastBlob();
+                if (url == null)
+                    return null;
+                Date date = new Date();
+                DateTimeFormat dtf = DateTimeFormat.getFormat("yyyyMMdd-HHmm");
+                String fname = "audio-"+ dtf.format(date) + ".circuitjs.wav";
+                Anchor a=new Anchor(Locale.LS("Download last played audio"), url);
+                a.getElement().setAttribute("Download", fname);
+                ei.widget = a;
+                return ei;
+            }
+	    
 	    return null;
 	}
 	public void setEditValue(int n, EditInfo ei) {
@@ -189,7 +210,7 @@ public class AudioOutputElm extends CircuitElm {
 //	    int frac = (int)Math.round(Math.max(sampleStep*33000, 1));
 	    double target = sampleStep/8;
 	    if (sim.maxTimeStep != target) {
-                if (okToChangeTimeStep || Window.confirm(sim.LS("Adjust timestep for best audio quality and performance?"))) {
+                if (okToChangeTimeStep || Window.confirm(Locale.LS("Adjust timestep for best audio quality and performance?"))) {
                     sim.maxTimeStep = target;
                     okToChangeTimeStep = true;
                 }
@@ -197,7 +218,7 @@ public class AudioOutputElm extends CircuitElm {
 	}
 	
         void createButton() {
-            String label = "&#9654; " + sim.LS("Play Audio");
+            String label = "&#9654; " + Locale.LS("Play Audio");
             if (labelNum > 1)
         	label += " " + labelNum;
             sim.addWidgetToVerticalPanel(button = new Button(label));
@@ -278,7 +299,7 @@ public class AudioOutputElm extends CircuitElm {
         	intBuffer[9] = 0x0000; //
         		
         	intBuffer[10] = 0x0001; // format tag : 1 
-        	intBuffer[11] = this._channels; // channels: 2
+        	intBuffer[11] = this._channels; // channels: 1
         	
         	intBuffer[12] = this._sampleRate & 0x0000ffff; // sample per sec
         	intBuffer[13] = (this._sampleRate & 0xffff0000) >> 16; // sample per sec
@@ -286,7 +307,7 @@ public class AudioOutputElm extends CircuitElm {
         	intBuffer[14] = (2*this._channels*this._sampleRate) & 0x0000ffff; // byte per sec
         	intBuffer[15] = ((2*this._channels*this._sampleRate) & 0xffff0000) >> 16; // byte per sec
         	
-        	intBuffer[16] = 0x0004; // block align
+        	intBuffer[16] = 2*this._channels; // block align
         	intBuffer[17] = 0x0010; // bit per sample
         	intBuffer[18] = 0x0000; // cb size
         	intBuffer[19] = 0x6164; // "da"
@@ -329,6 +350,10 @@ public class AudioOutputElm extends CircuitElm {
 	audio.play();
 }-*/;
 
+        static native String getLastBlob() /*-{
+            return $doc.audioBlob;
+        }-*/;
+        
         void play() {
             int i;
             JsArrayInteger arr = (JsArrayInteger)JsArrayInteger.createArray();
@@ -339,7 +364,7 @@ public class AudioOutputElm extends CircuitElm {
         	base = dataPtr;
             }
             if (ct * sampleStep < .05) {
-        	Window.alert(sim.LS("Audio data is not ready yet.  Increase simulation speed to make data ready sooner."));
+        	Window.alert(Locale.LS("Audio data is not ready yet.  Increase simulation speed to make data ready sooner."));
         	return;
             }
             

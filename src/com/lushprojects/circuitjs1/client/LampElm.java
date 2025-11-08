@@ -19,7 +19,9 @@
 
 package com.lushprojects.circuitjs1.client;
 
-    class LampElm extends CircuitElm {
+import com.lushprojects.circuitjs1.client.util.Locale;
+
+class LampElm extends CircuitElm {
 	double resistance;
 	final double roomTemp = 300;
 	double temp, nom_pow, nom_v, warmTime, coolTime;
@@ -30,6 +32,7 @@ package com.lushprojects.circuitjs1.client;
 	    nom_v = 120;
 	    warmTime = .4;
 	    coolTime = .4;
+	    startIteration(); // set resistance
 	}
 	public LampElm(int xa, int ya, int xb, int yb, int f,
 		    StringTokenizer st) {
@@ -41,6 +44,7 @@ package com.lushprojects.circuitjs1.client;
 	    nom_v = new Double(st.nextToken()).doubleValue();
 	    warmTime = new Double(st.nextToken()).doubleValue();
 	    coolTime = new Double(st.nextToken()).doubleValue();
+	    startIteration(); // set resistance
 	}
 	String dump() {
 	    return super.dump() + " " + temp + " " + nom_pow + " " + nom_v +
@@ -55,9 +59,7 @@ package com.lushprojects.circuitjs1.client;
 	    super.reset();
 	    temp = roomTemp;
 	    
-	    // make sure resistance is not 0 or NaN or current will be NaN before we have a chance
-	    // to call startIteration()
-	    resistance = 100;
+	    startIteration(); // set resistance
 	}
 	final int filament_len = 24;
 	void setPoints() {
@@ -108,7 +110,7 @@ package com.lushprojects.circuitjs1.client;
 	    setPowerColor(g, true);
 	    g.setColor(getTempColor());
 	    g.fillOval(bulb.x-bulbR, bulb.y-bulbR, bulbR*2, bulbR*2);
-	    g.setColor(Color.white);
+	    g.setColor(whiteColor);
 	    drawThickCircle(g, bulb.x, bulb.y, bulbR);
 	    setVoltageColor(g, v1);
 	    drawThickLine(g, lead1, filament[0]);
@@ -119,13 +121,13 @@ package com.lushprojects.circuitjs1.client;
 	    updateDotCount();
 	    if (sim.dragElm != this) {
 		drawDots(g, point1, lead1, curcount);
-		double cc = curcount+(dn-16)/2;
+		double cc = addCurCount(curcount, (dn-16)/2);
 		drawDots(g, lead1,  filament[0], cc);
-		cc += filament_len;
+		cc = addCurCount(cc, filament_len);
 		drawDots(g, filament[0], filament[1], cc);
-		cc += 16;
+		cc = addCurCount(cc, 16);
 		drawDots(g, filament[1], lead2, cc);
-		cc += filament_len;
+		cc = addCurCount(cc, filament_len);
 		drawDots(g, lead2, point2, curcount);
 	    }
 	    drawPosts(g);
@@ -165,7 +167,7 @@ package com.lushprojects.circuitjs1.client;
 	void getInfo(String arr[]) {
 	    arr[0] = "lamp";
 	    getBasicInfo(arr);
-	    arr[3] = "R = " + getUnitText(resistance, sim.ohmString);
+	    arr[3] = "R = " + getUnitText(resistance, Locale.ohmString);
 	    arr[4] = "P = " + getUnitText(getPower(), "W");
 	    arr[5] = "T = " + ((int) temp) + " K";
 	}
