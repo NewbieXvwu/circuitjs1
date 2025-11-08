@@ -405,11 +405,23 @@ body.menu-open {
     text-align: right;
 }
 
-/* Popup menus - MD3 rounded corners */
+/* Popup menus - MD3 rounded corners with Material You slide-down animation */
+@keyframes menuSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .gwt-MenuBarPopup {
     border: none !important;
     background: transparent !important;
     min-width: 280px;
+    animation: menuSlideDown 0.25s cubic-bezier(0.05, 0.7, 0.1, 1.0) forwards;
 }
 
 /* Hide all the decorative border cells */
@@ -432,14 +444,16 @@ body.menu-open {
 
 .gwt-MenuBarPopup .menuPopupMiddleCenterInner {
     border-radius: var(--md-sys-shape-corner-medium) !important;
-    background-color: var(--md-sys-color-surface) !important;
-    box-shadow: var(--md-sys-elevation-3) !important;
+    background-color: rgba(254, 247, 255, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    box-shadow: none !important;
     overflow: hidden !important;
-    border: none !important;
+    border: 1px solid var(--md-sys-color-outline-variant) !important;
 }
 
 .gwt-MenuBarPopup .gwt-MenuBar-vertical {
-    background-color: var(--md-sys-color-surface) !important;
+    background-color: transparent !important;
     border: none !important;
     border-radius: var(--md-sys-shape-corner-medium) !important;
     max-height: calc(100vh - 100px) !important;
@@ -456,19 +470,22 @@ body.menu-open {
     white-space: nowrap !important;
 }
 
-/* Right-click context menu (primary menu) - MD3 rounded corners */
+/* Right-click context menu (primary menu) - MD3 rounded corners with Material You slide-down animation */
 .gwt-PopupPanel {
     border: none !important;
     background: transparent !important;
-    box-shadow: var(--md-sys-elevation-3) !important;
+    box-shadow: none !important;
     border-radius: var(--md-sys-shape-corner-medium) !important;
+    animation: menuSlideDown 0.25s cubic-bezier(0.05, 0.7, 0.1, 1.0) forwards;
 }
 
 .gwt-PopupPanel .gwt-MenuBar {
-    background-color: var(--md-sys-color-surface) !important;
-    border: none !important;
+    background-color: rgba(254, 247, 255, 0.9) !important;
+    backdrop-filter: blur(10px) !important;
+    -webkit-backdrop-filter: blur(10px) !important;
+    border: 1px solid var(--md-sys-color-outline-variant) !important;
     border-radius: var(--md-sys-shape-corner-medium) !important;
-    box-shadow: var(--md-sys-elevation-3) !important;
+    box-shadow: none !important;
     padding: 8px 0 !important;
     width: auto !important;
     white-space: nowrap !important;
