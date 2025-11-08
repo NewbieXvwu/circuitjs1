@@ -26,54 +26,57 @@ public class Toolbar extends HorizontalPanel {
 
     public Toolbar() {
         // Set the overall style of the toolbar
-	Style style = getElement().getStyle();
-        style.setPadding(2, Style.Unit.PX);
-        style.setBackgroundColor("#f8f8f8");
-        style.setBorderWidth(1, Style.Unit.PX);
-        style.setBorderStyle(Style.BorderStyle.SOLID);
-        style.setBorderColor("#ccc");
+    Style style = getElement().getStyle();
+        style.setPadding(6, Style.Unit.PX);
         style.setDisplay(Style.Display.FLEX);
-	setVerticalAlignment(ALIGN_MIDDLE);
+        style.setProperty("gap", "8px");
+        style.setProperty("alignItems", "center");
+        style.setProperty("backgroundColor", "var(--md-sys-color-surface)");
+        style.setProperty("border", "1px solid var(--md-sys-color-outline-variant)");
+        style.setProperty("boxShadow", "var(--md-sys-elevation-1)");
+        style.setProperty("borderRadius", "16px");
+        style.setProperty("margin", "8px 16px");
+    setVerticalAlignment(ALIGN_MIDDLE);
 
-	add(createIconButton("ccw", "Undo", new MyCommand("edit", "undo")));
-	add(createIconButton("cw",  "Redo", new MyCommand("edit", "redo")));
-	add(createIconButton("scissors", "Cut", new MyCommand("edit", "cut")));
-	add(createIconButton("copy", "Copy", new MyCommand("edit", "copy")));
-	add(createIconButton("paste", "Paste", new MyCommand("edit", "paste")));
-	add(createIconButton("clone", "Duplicate", new MyCommand("edit", "duplicate")));
-	add(createIconButton("search", "Find Component...", new MyCommand("edit", "search")));
+    add(createIconButton("ccw", "Undo", new MyCommand("edit", "undo")));
+    add(createIconButton("cw",  "Redo", new MyCommand("edit", "redo")));
+    add(createIconButton("scissors", "Cut", new MyCommand("edit", "cut")));
+    add(createIconButton("copy", "Copy", new MyCommand("edit", "copy")));
+    add(createIconButton("paste", "Paste", new MyCommand("edit", "paste")));
+    add(createIconButton("clone", "Duplicate", new MyCommand("edit", "duplicate")));
+    add(createIconButton("search", "Find Component...", new MyCommand("edit", "search")));
 
-	add(createIconButton("zoom-11", "Zoom 100%", new MyCommand("zoom", "zoom100")));
-	add(createIconButton("zoom-in", "Zoom In", new MyCommand("zoom", "zoomin")));
-	add(createIconButton("zoom-out", "Zoom Out", new MyCommand("zoom", "zoomout")));
+    add(createIconButton("zoom-11", "Zoom 100%", new MyCommand("zoom", "zoom100")));
+    add(createIconButton("zoom-in", "Zoom In", new MyCommand("zoom", "zoomin")));
+    add(createIconButton("zoom-out", "Zoom Out", new MyCommand("zoom", "zoomout")));
 
-	add(createIconButton(wireIcon, "WireElm"));
-	add(resistorButton = createIconButton(resistorIcon, "ResistorElm"));
-	add(createIconButton(groundIcon, "GroundElm"));
-	add(createIconButton(capacitorIcon, "CapacitorElm"));
-	add(createIconButton(inductIcon, "InductorElm"));
-	add(createIconButton(diodeIcon, "DiodeElm"));
-	String srcInfo[] = { voltage2Icon, "DCVoltageElm", acSrcIcon, "ACVoltageElm" };
-	add(createButtonSet(srcInfo));
-	add(createIconButton(railIcon, "RailElm"));
+    add(createIconButton(wireIcon, "WireElm"));
+    add(resistorButton = createIconButton(resistorIcon, "ResistorElm"));
+    add(createIconButton(groundIcon, "GroundElm"));
+    add(createIconButton(capacitorIcon, "CapacitorElm"));
+    add(createIconButton(inductIcon, "InductorElm"));
+    add(createIconButton(diodeIcon, "DiodeElm"));
+    String srcInfo[] = { voltage2Icon, "DCVoltageElm", acSrcIcon, "ACVoltageElm" };
+    add(createButtonSet(srcInfo));
+    add(createIconButton(railIcon, "RailElm"));
 
-	String switchInfo[] = { switchIcon, "SwitchElm", spdtIcon, "Switch2Elm", aswitch1Icon, "AnalogSwitchElm",
-				aswitch2Icon, "AnalogSwitch2Elm" };
-	add(createButtonSet(switchInfo));
+    String switchInfo[] = { switchIcon, "SwitchElm", spdtIcon, "Switch2Elm", aswitch1Icon, "AnalogSwitchElm",
+                aswitch2Icon, "AnalogSwitch2Elm" };
+    add(createButtonSet(switchInfo));
 
-	String opAmpInfo[] = { opAmpBotIcon, "OpAmpElm", opAmpTopIcon, "OpAmpSwapElm" };
-	add(createButtonSet(opAmpInfo));
+    String opAmpInfo[] = { opAmpBotIcon, "OpAmpElm", opAmpTopIcon, "OpAmpSwapElm" };
+    add(createButtonSet(opAmpInfo));
 
-	String transistorInfo[] = { transistorIcon, "NTransistorElm", pnpTransistorIcon, "PTransistorElm" };
-	add(createButtonSet(transistorInfo));
+    String transistorInfo[] = { transistorIcon, "NTransistorElm", pnpTransistorIcon, "PTransistorElm" };
+    add(createButtonSet(transistorInfo));
 
-	String fetInfo[] = { fetIcon, "NMosfetElm", fetIcon2, "PMosfetElm" };
-	add(createButtonSet(fetInfo));
+    String fetInfo[] = { fetIcon, "NMosfetElm", fetIcon2, "PMosfetElm" };
+    add(createButtonSet(fetInfo));
 
-	add(createIconButton(inverterIcon, "InverterElm"));
-	String gateInfo[] = { andIcon, "AndGateElm", nandIcon, "NandGateElm", 
-			      orIcon, "OrGateElm", norIcon, "NorGateElm", xorIcon, "XorGateElm" };
-	add(createButtonSet(gateInfo));
+    add(createIconButton(inverterIcon, "InverterElm"));
+    String gateInfo[] = { andIcon, "AndGateElm", nandIcon, "NandGateElm", 
+                  orIcon, "OrGateElm", norIcon, "NorGateElm", xorIcon, "XorGateElm" };
+    add(createButtonSet(gateInfo));
 
         // Spacer to push the mode label to the right
         HorizontalPanel spacer = new HorizontalPanel();
@@ -89,45 +92,58 @@ public class Toolbar extends HorizontalPanel {
     public void setModeLabel(String text) { modeLabel.setText(Locale.LS("Mode: ") + text); }
 
     private Label createIconButton(String icon, String cls) {
-	CirSim sim = CirSim.theSim;
-	return createIconButton(icon, sim.getLabelTextForClass(cls), new MyCommand("main", cls));
+    CirSim sim = CirSim.theSim;
+    return createIconButton(icon, sim.getLabelTextForClass(cls), new MyCommand("main", cls));
     }
 
     private Label createIconButton(String iconClass, String tooltip, MyCommand command) {
         // Create a label to hold the icon
         Label iconLabel = new Label();
         iconLabel.setText(""); // No text, just an icon
-	if (iconClass.startsWith("<svg"))
-	    iconLabel.getElement().setInnerHTML(makeSvg(iconClass, 24));
+    if (iconClass.startsWith("<svg"))
+        iconLabel.getElement().setInnerHTML(makeSvg(iconClass, 24));
         else
-	    iconLabel.getElement().addClassName("cirjsicon-" + iconClass);
+        iconLabel.getElement().addClassName("cirjsicon-" + iconClass);
         iconLabel.setTitle(Locale.LS(tooltip));
 
         // Style the icon button
-	Style style = iconLabel.getElement().getStyle();
+    Style style = iconLabel.getElement().getStyle();
         style.setFontSize(24, Style.Unit.PX);
-        style.setColor("#333");
-        style.setPadding(1, Style.Unit.PX);
-        style.setMarginRight(5, Style.Unit.PX);
+        style.setColor("#49454F");
+        style.setPadding(8, Style.Unit.PX);
         style.setCursor(Style.Cursor.POINTER);
-	if (iconClass.startsWith("<svg"))
-	    style.setPaddingTop(5, Style.Unit.PX);
+        style.setProperty("borderRadius", "8px");
+        style.setProperty("transition", "all 0.2s cubic-bezier(0.4, 0, 0.2, 1)");
+    if (iconClass.startsWith("<svg"))
+        style.setPaddingTop(8, Style.Unit.PX);
 
         // Add hover effect for the button
-        iconLabel.addMouseOverHandler(event -> iconLabel.getElement().getStyle().setColor("#007bff"));
-        iconLabel.addMouseOutHandler(event -> iconLabel.getElement().getStyle().setColor("#333"));
+        iconLabel.addMouseOverHandler(event -> {
+            iconLabel.getElement().getStyle().setProperty("backgroundColor", "var(--md-sys-color-surface-variant)");
+            iconLabel.getElement().getStyle().setProperty("color", "var(--md-sys-color-primary)");
+        });
+        iconLabel.addMouseOutHandler(event -> {
+            if (iconLabel != activeButton) {
+                iconLabel.getElement().getStyle().setProperty("backgroundColor", "transparent");
+                iconLabel.getElement().getStyle().setColor("#49454F");
+            } else {
+                iconLabel.getElement().getStyle().setProperty("color", "var(--md-sys-color-primary)");
+                iconLabel.getElement().getStyle().setProperty("backgroundColor", "var(--md-sys-color-primary-container)");
+            }
+        });
 
         // Add a click handler to perform the action
         iconLabel.addClickHandler(new ClickHandler() {
             @Override
             public void onClick(ClickEvent event) {
-		// un-highlight
-        	iconLabel.getElement().getStyle().setColor("#333");
-		if (iconLabel == activeButton) {
-		    new MyCommand("main", "Select").execute();
-		    activeButton = null;
-		} else
-		    command.execute();
+        // un-highlight
+            iconLabel.getElement().getStyle().setProperty("backgroundColor", "transparent");
+            iconLabel.getElement().getStyle().setColor("#49454F");
+        if (iconLabel == activeButton) {
+            new MyCommand("main", "Select").execute();
+            activeButton = null;
+        } else
+            command.execute();
             }
         });
 
@@ -139,113 +155,113 @@ public class Toolbar extends HorizontalPanel {
     }
 
     String makeSvg(String s, int size) {
-	double scale = size/24.0;
-	return "<svg xmlns='http://www.w3.org/2000/svg' width='" + size + "' height='" + size + "'><g transform='scale(" + scale + ")'>" +
+    double scale = size/24.0;
+    return "<svg xmlns='http://www.w3.org/2000/svg' width='" + size + "' height='" + size + "'><g transform='scale(" + scale + ")'>" +
                  s.substring(5, s.length()-5) + "<g></svg>";
     }
 
     // New method for creating variant buttons
     private Label createButtonSet(String info[]) {
-	MyCommand mainCommand = new MyCommand("main", info[1]);
-	CirSim sim = CirSim.theSim;
-	Label iconLabel = createIconButton(info[0], sim.getLabelTextForClass(info[1]), mainCommand);
-	
-	FlowPanel paletteContainer = new FlowPanel();
-	paletteContainer.setVisible(false); // Hidden by default
-	paletteContainer.setStyleName("palette-container");
+    MyCommand mainCommand = new MyCommand("main", info[1]);
+    CirSim sim = CirSim.theSim;
+    Label iconLabel = createIconButton(info[0], sim.getLabelTextForClass(info[1]), mainCommand);
+    
+    FlowPanel paletteContainer = new FlowPanel();
+    paletteContainer.setVisible(false); // Hidden by default
+    paletteContainer.setStyleName("palette-container");
 
-	// Apply CSS styles for positioning and visibility
-	Style paletteStyle = paletteContainer.getElement().getStyle();
-	paletteStyle.setPosition(Style.Position.ABSOLUTE);
-	paletteStyle.setZIndex(1000); // High z-index to appear on top
-	paletteStyle.setBackgroundColor("#ffffff");
-	paletteStyle.setBorderWidth(1, Style.Unit.PX);
-	paletteStyle.setBorderColor("#ccc");
-	paletteStyle.setBorderStyle(Style.BorderStyle.SOLID);
-	paletteStyle.setPadding(5, Style.Unit.PX);
+    // Apply CSS styles for positioning and visibility
+    Style paletteStyle = paletteContainer.getElement().getStyle();
+    paletteStyle.setPosition(Style.Position.ABSOLUTE);
+    paletteStyle.setZIndex(1000); // High z-index to appear on top
+    paletteStyle.setBackgroundColor("#ffffff");
+    paletteStyle.setBorderWidth(1, Style.Unit.PX);
+    paletteStyle.setBorderColor("#ccc");
+    paletteStyle.setBorderStyle(Style.BorderStyle.SOLID);
+    paletteStyle.setPadding(5, Style.Unit.PX);
 
-	int i;
-	for (i = 0; i < info.length; i += 2) {
-	    // Create each variant button
-	    Label variantButton = new Label();
-	    variantButton.setText(""); // No text, just an icon
-	    variantButton.getElement().setInnerHTML(makeSvg(info[i], 40));
-	    variantButton.setTitle(sim.getLabelTextForClass(info[i+1]));
+    int i;
+    for (i = 0; i < info.length; i += 2) {
+        // Create each variant button
+        Label variantButton = new Label();
+        variantButton.setText(""); // No text, just an icon
+        variantButton.getElement().setInnerHTML(makeSvg(info[i], 40));
+        variantButton.setTitle(sim.getLabelTextForClass(info[i+1]));
 
-	    // Style the variant button
-	    Style variantStyle = variantButton.getElement().getStyle();
-	    variantStyle.setColor("#333");
-	    //variantStyle.setPadding(5, Style.Unit.PX);
-	    variantStyle.setCursor(Style.Cursor.POINTER);
+        // Style the variant button
+        Style variantStyle = variantButton.getElement().getStyle();
+        variantStyle.setColor("#333");
+        //variantStyle.setPadding(5, Style.Unit.PX);
+        variantStyle.setCursor(Style.Cursor.POINTER);
 
-	    final MyCommand command = new MyCommand("main", info[i+1]);
-	    final String smallSvg = makeSvg(info[i], 24);
+        final MyCommand command = new MyCommand("main", info[i+1]);
+        final String smallSvg = makeSvg(info[i], 24);
 
-	    // Add click handler to update the main button and execute the command
-	    variantButton.addClickHandler(event -> {
-		// Change the icon of the main button to reflect the variant selected
-		iconLabel.getElement().setInnerHTML(smallSvg);
-		highlightableButtons.remove(mainCommand.getItemName());
+        // Add click handler to update the main button and execute the command
+        variantButton.addClickHandler(event -> {
+        // Change the icon of the main button to reflect the variant selected
+        iconLabel.getElement().setInnerHTML(smallSvg);
+        highlightableButtons.remove(mainCommand.getItemName());
                 highlightableButtons.put(command.getItemName(), iconLabel);
-		paletteContainer.setVisible(false);
-		mainCommand.setItemName(command.getItemName());
-		command.execute();  // Execute the corresponding command for the selected variant
-	    });
+        paletteContainer.setVisible(false);
+        mainCommand.setItemName(command.getItemName());
+        command.execute();  // Execute the corresponding command for the selected variant
+        });
 
-	    // Append the variant button to the palette container
-	    paletteContainer.add(variantButton);
-	}
+        // Append the variant button to the palette container
+        paletteContainer.add(variantButton);
+    }
 
-	// Add the palette container to the document (or you could append it to the toolbar directly)
-	RootPanel.get().add(paletteContainer);
+    // Add the palette container to the document (or you could append it to the toolbar directly)
+    RootPanel.get().add(paletteContainer);
 
-	// Show palette on mouse-over
-	iconLabel.addMouseOverHandler(event -> {
-	    paletteContainer.setVisible(true);
+    // Show palette on mouse-over
+    iconLabel.addMouseOverHandler(event -> {
+        paletteContainer.setVisible(true);
 
-	    // Position the palette relative to the icon label
-	    int leftOffset = iconLabel.getAbsoluteLeft() - 12;
-	    int topOffset = iconLabel.getAbsoluteTop() + iconLabel.getOffsetHeight() - 2;
-	    paletteContainer.getElement().getStyle().setLeft(leftOffset, Style.Unit.PX);
-	    paletteContainer.getElement().getStyle().setTop(topOffset, Style.Unit.PX);
-	});
+        // Position the palette relative to the icon label
+        int leftOffset = iconLabel.getAbsoluteLeft() - 12;
+        int topOffset = iconLabel.getAbsoluteTop() + iconLabel.getOffsetHeight() - 2;
+        paletteContainer.getElement().getStyle().setLeft(leftOffset, Style.Unit.PX);
+        paletteContainer.getElement().getStyle().setTop(topOffset, Style.Unit.PX);
+    });
 
-	// Hide palette on mouse-out
-	iconLabel.addMouseOutHandler(event -> { paletteContainer.setVisible(false); });
+    // Hide palette on mouse-out
+    iconLabel.addMouseOutHandler(event -> { paletteContainer.setVisible(false); });
 
-	// Keep the palette visible when hovering over it
-	paletteContainer.addDomHandler(event -> paletteContainer.setVisible(true), MouseOverEvent.getType());
-	paletteContainer.addDomHandler(event -> { paletteContainer.setVisible(false); }, MouseOutEvent.getType());
+    // Keep the palette visible when hovering over it
+    paletteContainer.addDomHandler(event -> paletteContainer.setVisible(true), MouseOverEvent.getType());
+    paletteContainer.addDomHandler(event -> { paletteContainer.setVisible(false); }, MouseOutEvent.getType());
 
-	return iconLabel;
+    return iconLabel;
     }
 
     private void styleModeLabel(Label label) {
-	Style style = label.getElement().getStyle();
+    Style style = label.getElement().getStyle();
         style.setFontSize(16, Style.Unit.PX);
         style.setColor("#333");
         style.setPaddingRight(10, Style.Unit.PX);
-	style.setProperty("whiteSpace", "nowrap");
+    style.setProperty("whiteSpace", "nowrap");
     }
 
     public void highlightButton(String key) {
         // Deactivate the currently active button
         if (activeButton != null) {
-            activeButton.getElement().getStyle().setColor("#333"); // Reset color
-            activeButton.getElement().getStyle().setBackgroundColor(null);
+            activeButton.getElement().getStyle().setColor("#49454F"); // Reset color
+            activeButton.getElement().getStyle().setProperty("backgroundColor", "transparent");
         }
 
         // Activate the new button
         Label newActiveButton = highlightableButtons.get(key);
         if (newActiveButton != null) {
-            newActiveButton.getElement().getStyle().setColor("#007bff"); // Active color
-            newActiveButton.getElement().getStyle().setBackgroundColor("#e6f7ff");
+            newActiveButton.getElement().getStyle().setProperty("color", "var(--md-sys-color-primary)");
+            newActiveButton.getElement().getStyle().setProperty("backgroundColor", "var(--md-sys-color-primary-container)");
             activeButton = newActiveButton;
         }
     }
 
     public void setEuroResistors(boolean euro) {
-	resistorButton.getElement().setInnerHTML(makeSvg(euro ? euroResistorIcon : resistorIcon, 24));
+    resistorButton.getElement().setInnerHTML(makeSvg(euro ? euroResistorIcon : resistorIcon, 24));
     }
 
     final String wireIcon = "<svg><g transform='scale(0.208) translate(7.5, 32)'>" +
