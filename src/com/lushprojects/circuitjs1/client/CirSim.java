@@ -211,6 +211,9 @@ MouseOutHandler, MouseWheelHandler {
     double minTimeStep;
 
     double wheelSensitivity = 1;
+    
+    // flag to control whether shortcuts are shown in menu items (false for context menu, true for top menu)
+    boolean showMenuShortcuts = false;
 
     // accumulated time since we incremented timeStepCount
     double timeStepAccum;
@@ -1113,6 +1116,7 @@ MouseOutHandler, MouseWheelHandler {
     
     // this is called twice, once for the Draw menu, once for the right mouse popup menu
     public void composeMainMenu(MenuBar mainMenuBar, int num) {
+        showMenuShortcuts = (num == 1);
         mainMenuBar.addItem(getClassCheckItem(Locale.LS("Add Wire"), "WireElm"));
         mainMenuBar.addItem(getClassCheckItem(Locale.LS("Add Resistor"), "ResistorElm"));
 
@@ -1384,7 +1388,7 @@ MouseOutHandler, MouseWheelHandler {
         //    } catch (Exception ee) {
         //        ee.printStackTrace();
         //    }
-        if (shortcut=="")
+        if (shortcut=="" || !showMenuShortcuts)
             mi= new CheckboxMenuItem(s);
         else
             mi = new CheckboxMenuItem(s, shortcut);
@@ -4770,8 +4774,14 @@ MouseOutHandler, MouseWheelHandler {
             doMainMenuChecks();
             contextPanel=new PopupPanel(true);
             contextPanel.add(mainMenuBar);
-            x=Math.max(0, Math.min(menuClientX, canvasWidth-400));
-            y=Math.max(0, Math.min(menuClientY, canvasHeight-450));
+            x = menuClientX;
+            y = menuClientY;
+            if (x + 400 > canvasWidth) {
+                x = Math.max(0, canvasWidth - 400);
+            }
+            if (y + 450 > canvasHeight) {
+                y = Math.max(0, canvasHeight - 450);
+            }
             contextPanel.setPopupPosition(x,y);
             contextPanel.show();
         }
