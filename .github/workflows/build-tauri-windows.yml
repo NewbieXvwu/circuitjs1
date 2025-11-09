@@ -165,7 +165,7 @@ jobs:
           }
           
           # Create a README for portable version
-          @"
+          $readmeContent = @'
 CircuitJS1 Portable Version
 ============================
 
@@ -178,7 +178,8 @@ To use:
 3. Enjoy!
 
 Note: All application data will be stored in your user profile.
-"@ | Out-File -FilePath "$portableDir/README.txt" -Encoding UTF8
+'@
+          $readmeContent | Out-File -FilePath "$portableDir/README.txt" -Encoding UTF8
           
           # Compress to zip
           Compress-Archive -Path $portableDir -DestinationPath "CircuitJS1-Tauri-Windows-x64-Portable.zip" -Force
