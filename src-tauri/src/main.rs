@@ -83,13 +83,21 @@ fn toggle_dev_tools(window: Window) {
     }
 }
 
+#[tauri::command]
+fn show_main_window(window: Window) -> Result<(), String> {
+    window.show().map_err(|e| e.to_string())?;
+    window.set_focus().map_err(|e| e.to_string())?;
+    Ok(())
+}
+
 fn main() {
     tauri::Builder::default()
         .invoke_handler(tauri::generate_handler![
             show_save_dialog,
             save_file,
             open_file_dialog,
-            toggle_dev_tools
+            toggle_dev_tools,
+            show_main_window
         ])
         .setup(|app| {
             let window = app.get_window("main").unwrap();

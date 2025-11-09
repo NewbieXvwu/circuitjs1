@@ -146,6 +146,47 @@ jobs:
           }
         shell: pwsh
       
+      - name: Create portable version
+        run: |
+          Write-Host "=== Creating portable version ==="
+          
+          # Create portable directory
+          $portableDir = "CircuitJS1-Tauri-Portable"
+          New-Item -ItemType Directory -Force -Path $portableDir | Out-Null
+          
+          # Copy the executable
+          $exePath = "src-tauri/target/x86_64-pc-windows-msvc/release/CircuitJS1.exe"
+          if (Test-Path $exePath) {
+            Copy-Item $exePath $portableDir/
+            Write-Host "Copied executable to portable directory"
+          } else {
+            Write-Host "ERROR: Executable not found at $exePath"
+            exit 1
+          }
+          
+          # Create a README for portable version
+          @"
+CircuitJS1 Portable Version
+============================
+
+This is the portable version of CircuitJS1.
+No installation required - just run CircuitJS1.exe
+
+To use:
+1. Extract this folder to any location
+2. Run CircuitJS1.exe
+3. Enjoy!
+
+Note: All application data will be stored in your user profile.
+"@ | Out-File -FilePath "$portableDir/README.txt" -Encoding UTF8
+          
+          # Compress to zip
+          Compress-Archive -Path $portableDir -DestinationPath "CircuitJS1-Tauri-Windows-x64-Portable.zip" -Force
+          
+          Write-Host "Portable version created successfully"
+          Get-ChildItem "CircuitJS1-Tauri-Windows-x64-Portable.zip"
+        shell: pwsh
+      
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -153,4 +194,5 @@ jobs:
           path: |
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+            CircuitJS1-Tauri-Windows-x64-Portable.zip
           if-no-files-found: error
