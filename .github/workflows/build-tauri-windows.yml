@@ -2,9 +2,6 @@ name: Build Tauri Windows x64
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - feat-tauri-windows-gh-actions-static-build
 
 jobs:
   build:
