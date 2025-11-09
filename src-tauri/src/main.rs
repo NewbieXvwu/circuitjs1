@@ -2,11 +2,10 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use std::fs;
-use std::path::PathBuf;
 use tauri::{Manager, Window};
 
 #[tauri::command]
-async fn show_save_dialog(window: Window) -> Result<Option<String>, String> {
+async fn show_save_dialog(_window: Window) -> Result<Option<String>, String> {
     use tauri::api::dialog::FileDialogBuilder;
     
     let (tx, rx) = std::sync::mpsc::channel();
@@ -32,7 +31,7 @@ async fn save_file(path: String, content: String) -> Result<(), String> {
 }
 
 #[tauri::command]
-async fn open_file_dialog(window: Window) -> Result<Option<FileData>, String> {
+async fn open_file_dialog(_window: Window) -> Result<Option<FileData>, String> {
     use tauri::api::dialog::FileDialogBuilder;
     
     let (tx, rx) = std::sync::mpsc::channel();
