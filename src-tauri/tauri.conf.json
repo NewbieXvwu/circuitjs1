@@ -1,7 +1,7 @@
 {
   "build": {
     "beforeDevCommand": "",
-    "beforeBuildCommand": "./gradlew compileGwt makeSite && ./prepare-tauri.sh",
+    "beforeBuildCommand": "",
     "devPath": "../site-tauri",
     "distDir": "../site-tauri",
     "withGlobalTauri": false
