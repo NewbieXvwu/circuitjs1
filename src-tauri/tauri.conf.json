@@ -75,12 +75,7 @@
         "nsis": {
           "installerIcon": "icons/icon.ico",
           "installMode": "both",
-          "oneClick": false,
-          "allowDowngrade": true,
-          "allowToChangeInstallationDirectory": true,
-          "createDesktopIcon": true,
-          "createStartMenuShortcut": true,
-          "displayLanguageSelector": false
+          "languages": ["English"]
         }
       }
     },

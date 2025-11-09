@@ -1,0 +1,24 @@
+修复 GitHub Actions 缓存配置以提升构建速度
+
+主要改进：
+
+1. 添加 Cargo.lock 生成步骤
+   - 在缓存之前自动生成 Cargo.lock 文件
+   - 确保缓存 key 的 hash 值稳定可靠
+
+2. 优化 Rust 依赖缓存
+   - 移除 ~/.cargo/bin/ 从依赖缓存中（避免与 Tauri CLI 缓存冲突）
+   - 使用 src-tauri/Cargo.lock 替代 **/Cargo.lock 模式
+   - 保持标准的 Unix 风格路径（GitHub Actions 自动处理）
+
+3. 改进 Tauri CLI 缓存
+   - 指定完整路径：~/.cargo/bin/cargo-tauri.exe
+   - 添加 restore-keys 支持版本升级时的降级缓存
+
+预期效果：
+- 首次构建：完整编译（~10-15分钟）
+- 后续构建：缓存命中（~2-3分钟，节省70-80%时间）
+
+相关问题：
+- Cache not found for input keys: Windows-cargo-
+- Cache not found for input keys: Windows-tauri-cli-1.5.11
