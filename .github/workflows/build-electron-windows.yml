@@ -128,7 +128,7 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: CircuitJS1-Windows-x64
+          name: CircuitJS1-Electron-Windows-x64
           path: |
             app/dist/*.exe
             app/dist/*.exe.blockmap

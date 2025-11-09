@@ -71,6 +71,17 @@
         "timestampUrl": "",
         "wix": {
           "language": "en-US"
+        },
+        "nsis": {
+          "installerIcon": "icons/icon.ico",
+          "installMode": "both",
+          "perMachine": false,
+          "oneClick": false,
+          "allowDowngrade": true,
+          "allowToChangeInstallationDirectory": true,
+          "createDesktopIcon": true,
+          "createStartMenuShortcut": true,
+          "displayLanguageSelector": false
         }
       }
     },
