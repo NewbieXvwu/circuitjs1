@@ -51,18 +51,14 @@ Windows不认识`./`这种路径格式。
     cargo install tauri-cli --version "^1.5.0" --locked
 ```
 
-#### 改进: PowerShell原生准备脚本
+#### 改进: 使用Bash脚本准备
 ```yaml
 - name: Prepare Tauri build
-  run: |
-    # 复制文件
-    Copy-Item -Path site -Destination site-tauri -Recurse
-    
-    # 注入Tauri API
-    $htmlContent = Get-Content site-tauri/circuitjs.html -Raw
-    $htmlContent = $htmlContent -replace '...'
-    $htmlContent | Out-File site-tauri/circuitjs.html
+  run: bash prepare-tauri.sh
+  shell: bash
 ```
+
+**注意**: 最初尝试使用PowerShell原生实现，但PowerShell的here-string语法`@'...'@`在YAML中会引起解析错误。改用bash执行现有的`prepare-tauri.sh`脚本更简单可靠，且Windows的GitHub Actions已预装Git Bash。
 
 ---
 

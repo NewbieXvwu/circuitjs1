@@ -96,19 +96,14 @@ Error beforeBuildCommand failed with exit code 1
   run: cargo install tauri-cli --version "^1.5.0" --locked
 ```
 
-### GitHub Actions - PowerShell准备脚本
+### GitHub Actions - Bash准备脚本
 ```yaml
 - name: Prepare Tauri build
-  run: |
-    # 复制文件
-    Copy-Item -Path site -Destination site-tauri -Recurse
-    
-    # 注入Tauri API (PowerShell原生实现)
-    $htmlContent = Get-Content site-tauri/circuitjs.html -Raw
-    $htmlContent = $htmlContent -replace '...'
-    $htmlContent | Out-File site-tauri/circuitjs.html
-  shell: pwsh
+  run: bash prepare-tauri.sh
+  shell: bash
 ```
+
+注：原计划使用PowerShell原生实现，但PowerShell的here-string语法在YAML中会导致解析错误。最终改用bash执行prepare-tauri.sh脚本，Windows的GitHub Actions已预装Git Bash。
 
 ---
 

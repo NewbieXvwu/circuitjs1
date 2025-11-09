@@ -5,11 +5,12 @@
 已修复的问题:
 1. ✅ Windows构建命令错误
 2. ✅ Tauri CLI安装耗时过长
+3. ✅ GitHub Actions YAML语法错误
 
 修改的文件:
 - src-tauri/tauri.conf.json (1行)
-- .github/workflows/build-tauri-windows.yml (~100行)
-- 新增3个文档文件
+- .github/workflows/build-tauri-windows.yml (简化为使用bash脚本)
+- 新增4个文档文件
 
 ===========================================
 提交命令
@@ -26,24 +27,28 @@ git add .github/workflows/build-tauri-windows.yml
 git add TAURI_UPDATE_LOG.md
 git add GITHUB_ACTIONS_FIX.md
 git add FIX_SUMMARY.md
+git add YAML_SYNTAX_FIX.md
 git add COMMIT_GUIDE.txt
 
 # 提交
-git commit -m "fix: 修复Windows构建并优化Tauri CLI缓存
+git commit -m "fix: 修复Windows构建、YAML语法错误并优化Tauri CLI缓存
 
 - 清空tauri.conf.json的beforeBuildCommand避免Windows命令错误
 - 添加Tauri CLI专用缓存，减少安装时间从8分钟到<10秒
-- 将bash准备脚本转为PowerShell原生实现
+- 修复GitHub Actions中PowerShell here-string导致的YAML语法错误
+- 使用bash执行prepare-tauri.sh脚本（Windows已预装Git Bash）
 - 构建总时间减少约40%（缓存命中时）
 
 修复问题:
 1. Windows不认识./gradlew命令导致构建失败
 2. 每次构建都重新安装Tauri CLI耗时8分钟
+3. PowerShell here-string在YAML中导致语法错误
 
 技术改进:
-- PowerShell原生实现，跨平台兼容性更好
+- 使用bash脚本替代复杂的PowerShell字符串处理
 - 智能缓存策略，大幅提升CI/CD速度
-- 添加详细的构建日志和验证步骤"
+- 添加详细的构建日志和验证步骤
+- YAML语法清晰，易于维护"
 
 # 推送到GitHub
 git push origin feat-tauri-windows-gh-actions-static-build

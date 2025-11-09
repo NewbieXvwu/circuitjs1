@@ -16,11 +16,11 @@ Error beforeBuildCommand `./gradlew compileGwt makeSite && ./prepare-tauri.sh` f
 **解决方案**:
 - 移除了`tauri.conf.json`中的`beforeBuildCommand`
 - 在GitHub Actions中已经手动执行了所有构建步骤
-- 将bash脚本逻辑转换为PowerShell原生实现
+- 使用bash直接执行`prepare-tauri.sh`脚本（Windows已预装Git Bash）
 
 **修改的文件**:
 - `src-tauri/tauri.conf.json`: 清空`beforeBuildCommand`
-- `.github/workflows/build-tauri-windows.yml`: 使用PowerShell重写准备步骤
+- `.github/workflows/build-tauri-windows.yml`: 使用bash执行prepare-tauri.sh
 
 #### 2. Tauri CLI安装耗时过长
 **问题**: 每次构建都要重新安装Tauri CLI，耗时约8分钟
@@ -43,19 +43,17 @@ Error beforeBuildCommand `./gradlew compileGwt makeSite && ./prepare-tauri.sh` f
 
 ### 🔧 技术细节
 
-#### PowerShell准备脚本实现
+#### Bash脚本执行
 
-原先的bash脚本逻辑现在直接在GitHub Actions的PowerShell步骤中实现：
+GitHub Actions直接使用bash执行prepare-tauri.sh脚本：
 
-```powershell
-# 1. 复制site到site-tauri
-Copy-Item -Path site -Destination site-tauri -Recurse
-
-# 2. 注入Tauri API
-$htmlContent = Get-Content site-tauri/circuitjs.html -Raw
-$htmlContent = $htmlContent -replace '(<script.*lz-string.*>)', "$tauriScript`n`$1"
-$htmlContent | Out-File site-tauri/circuitjs.html -Encoding UTF8
+```yaml
+- name: Prepare Tauri build
+  run: bash prepare-tauri.sh
+  shell: bash
 ```
+
+Windows的GitHub Actions运行器已预装Git Bash，可以直接执行bash脚本。
 
 #### 缓存策略
 
