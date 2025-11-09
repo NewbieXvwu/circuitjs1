@@ -127,9 +127,9 @@ jobs:
           Write-Host "=== Icon generation complete ==="
         shell: pwsh
       
-      - name: Build Tauri app
+      - name: Build Tauri app (Installer)
         run: |
-          Write-Host "=== Building Tauri application ==="
+          Write-Host "=== Building Tauri application (Installer) ==="
           Write-Host "Current directory: $(Get-Location)"
           Write-Host ""
           
@@ -146,6 +146,32 @@ jobs:
           }
         shell: pwsh
       
+      - name: Create Portable Version
+        run: |
+          Write-Host "=== Creating Portable Version ==="
+          
+          # Create portable directory
+          $portableDir = "src-tauri/target/x86_64-pc-windows-msvc/release/bundle/portable"
+          New-Item -ItemType Directory -Force -Path $portableDir | Out-Null
+          
+          # Copy the executable to portable directory
+          $exePath = "src-tauri/target/x86_64-pc-windows-msvc/release/CircuitJS1.exe"
+          if (Test-Path $exePath) {
+            Write-Host "Copying executable to portable directory..."
+            Copy-Item $exePath "$portableDir/CircuitJS1-Portable.exe"
+            
+            # Create a marker file for portable mode
+            "portable" | Out-File -FilePath "$portableDir/portable.txt" -Encoding utf8
+            
+            Write-Host "Portable version created successfully"
+            Write-Host "Location: $portableDir"
+            Get-ChildItem $portableDir
+          } else {
+            Write-Host "ERROR: Executable not found at $exePath"
+            exit 1
+          }
+        shell: pwsh
+      
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -153,4 +179,5 @@ jobs:
           path: |
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/msi/*.msi
             src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+            src-tauri/target/x86_64-pc-windows-msvc/release/bundle/portable/CircuitJS1-Portable.exe
           if-no-files-found: error
