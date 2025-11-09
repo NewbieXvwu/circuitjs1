@@ -57,16 +57,21 @@ jobs:
         with:
           targets: x86_64-pc-windows-msvc
       
+      - name: Generate Cargo.lock
+        run: |
+          cd src-tauri
+          cargo generate-lockfile
+        shell: pwsh
+      
       - name: Cache Rust dependencies
         uses: actions/cache@v4
         with:
           path: |
-            ~/.cargo/bin/
             ~/.cargo/registry/index/
             ~/.cargo/registry/cache/
             ~/.cargo/git/db/
             src-tauri/target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('src-tauri/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
       
@@ -74,8 +79,10 @@ jobs:
         id: cache-tauri-cli
         uses: actions/cache@v4
         with:
-          path: ~/.cargo/bin/cargo-tauri*
+          path: ~/.cargo/bin/cargo-tauri.exe
           key: ${{ runner.os }}-tauri-cli-1.5.11
+          restore-keys: |
+            ${{ runner.os }}-tauri-cli-
       
       - name: Install Tauri CLI
         if: steps.cache-tauri-cli.outputs.cache-hit != 'true'
