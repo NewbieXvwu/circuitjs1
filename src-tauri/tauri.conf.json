@@ -75,7 +75,6 @@
         "nsis": {
           "installerIcon": "icons/icon.ico",
           "installMode": "both",
-          "perMachine": false,
           "oneClick": false,
           "allowDowngrade": true,
           "allowToChangeInstallationDirectory": true,
