@@ -25,6 +25,7 @@
   "build": {
     "appId": "com.lushprojects.circuitjs1",
     "productName": "CircuitJS1",
+    "publish": null,
     "directories": {
       "output": "dist"
     },
