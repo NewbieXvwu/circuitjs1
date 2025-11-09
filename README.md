@@ -142,6 +142,72 @@ podman run --rm -it -v $(pwd):/src:Z  -p 127.0.0.1:8000:8000/tcp -p 127.0.0.1:98
 
 This will use the current directory inside the container.
 
+## Building Desktop Application with Tauri
+
+CircuitJS1 can be built as a standalone desktop application using [Tauri](https://tauri.app/), a lightweight framework that uses Rust for the backend and web technologies for the frontend.
+
+### Quick Start
+
+For a quick start guide and GitHub Actions automated builds, see:
+- [TAURI_QUICKSTART.md](./TAURI_QUICKSTART.md) - Quick start guide for building with Tauri
+- [TAURI_BUILD_README.md](./TAURI_BUILD_README.md) - Detailed documentation
+
+### Automated Build with GitHub Actions
+
+The easiest way to build the desktop application is through GitHub Actions:
+
+1. Go to the "Actions" tab in the GitHub repository
+2. Select "Build Tauri Windows x64" workflow
+3. Click "Run workflow"
+4. Wait for the build to complete (~10-15 minutes)
+5. Download the artifacts (MSI and NSIS installers)
+
+The workflow automatically:
+- Compiles the GWT project
+- Prepares the Tauri build environment
+- Generates application icons
+- Builds Windows x64 installers
+
+### Local Build
+
+**Prerequisites:**
+- Rust 1.70+ ([Install](https://rustup.rs/))
+- Java 21+ (for GWT compilation)
+- System dependencies (see [TAURI_BUILD_README.md](./TAURI_BUILD_README.md))
+
+**Build commands:**
+```bash
+# 1. Compile GWT project
+./gradlew compileGwt
+./gradlew makeSite
+
+# 2. Prepare Tauri build
+./prepare-tauri.sh
+
+# 3. Install Tauri CLI
+cargo install tauri-cli
+
+# 4. Build application
+cargo tauri build
+```
+
+**Build outputs:**
+- Windows: `src-tauri/target/release/bundle/msi/` and `src-tauri/target/release/bundle/nsis/`
+- Linux: `src-tauri/target/release/bundle/deb/` and `src-tauri/target/release/bundle/appimage/`
+- macOS: `src-tauri/target/release/bundle/dmg/`
+
+### Tauri vs Electron
+
+| Feature | Electron (Legacy) | Tauri (Current) |
+|---------|------------------|-----------------|
+| Installer Size | ~100-150MB | ~10-20MB |
+| Memory Usage | High | Low |
+| Startup Time | Slower | Faster |
+| Technology | Node.js + Chromium | Rust + WebView |
+| Build Tool | electron-builder | cargo + tauri-cli |
+
+For more details, see the [Tauri documentation](./TAURI_BUILD_README.md).
+
 
 
 ## Embedding

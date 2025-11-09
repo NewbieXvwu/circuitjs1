@@ -5,7 +5,10 @@
   "description": "CircuitJS1 with Material You (MD3) UI and Cloudflare Pages deployment scripts",
   "scripts": {
     "build": "bash build-cloudflare.sh",
-    "deploy": "wrangler pages deploy war --project-name=circuitjs1"
+    "deploy": "wrangler pages deploy war --project-name=circuitjs1",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build"
   },
   "keywords": [
     "circuitjs1",

@@ -71,3 +71,8 @@ package-lock.json
 .gradle/
 build/
 site/
+
+# Tauri
+src-tauri/target/
+site-tauri/
+*.iconset
